@@ -1,6 +1,7 @@
 // assets
 import { NavLink } from "react-router-dom";
 import logo from "../assets/logo.svg";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Header = () => {
   return (
@@ -22,10 +23,11 @@ const Header = () => {
           </li>
         </ul>
       </div>
+      <ConnectButton/>
 
-      <button className="h-[60px] bg-[#EA3982] w-[215px] rounded-[10px] text-[#FFFFFF] font-medium">
+      {/* <button className="h-[60px] bg-[#EA3982] w-[215px] rounded-[10px] text-[#FFFFFF] font-medium">
         Connect wallet
-      </button>
+      </button> */}
     </div>
   );
 };
