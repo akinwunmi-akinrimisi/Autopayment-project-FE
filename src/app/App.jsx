@@ -1,6 +1,6 @@
 // ROUTER
 import Router from "../router/Router";
-
+import Auth from "../app/authentication";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import '@rainbow-me/rainbowkit/styles.css';
@@ -40,7 +40,7 @@ function App() {
     <div>
       <Router />
       <ToastContainer />
-      
+      <Auth />
     </div>
     </RainbowKitProvider>
     </QueryClientProvider>
