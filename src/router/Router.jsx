@@ -15,8 +15,8 @@ import {
     createRoutesFromElements(
       <Route>
         {/* SAMPLE ROUTE */}
-        {/* <Route index element={<Home />} /> */}
-        
+        {/* <Route path="/login" element={<Home />} /> */}
+
   
         {/* EVERY OTHER PAGE ROUTING SHOULD BE DONE IN HERE */}
         <Route path="/" element={<RootLayout />}>
