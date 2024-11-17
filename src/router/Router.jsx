@@ -9,6 +9,8 @@ import {
   import RootLayout from "../layout/RootLayout";
   import Auth from "../pages/auth/authentication";
 import Dashbaord from "../pages/dashboard/Dashbaord";
+import Invoice from "../pages/invoice/invoice";
+import Chat from "../pages/chat/chat";
   
   // PAGES
 //   import Home from "../pages/homePage/Home";
@@ -25,6 +27,9 @@ import Dashbaord from "../pages/dashboard/Dashbaord";
         
         <Route path="/admin" element={<RootLayout />}>
           <Route path="dashboard" element={<Dashbaord />} />
+          <Route path="invoice" element={<Invoice />} />
+          <Route path="chat" element={<Chat />} />
+          
           {/* TO NAVIGATE TO THIS ROUTE JUST GO TO: /invoice/test  */}
          </Route>  
       </Route>
