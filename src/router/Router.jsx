@@ -14,6 +14,7 @@ import Chat from "../pages/chat/chat";
 
 // PAGES
 import Home from "../pages/home/Home";
+import NewEscrow from "../pages/newEscrow/NewEscrow";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,7 +29,7 @@ const router = createBrowserRouter(
         <Route path="dashboard" element={<Dashbaord />} />
         <Route path="invoice" element={<Invoice />} />
         <Route path="chat" element={<Chat />} />
-
+        <Route path="new-escrow" element={<NewEscrow />} />
         {/* TO NAVIGATE TO THIS ROUTE JUST GO TO: /invoice/test  */}
       </Route>
     </Route>
