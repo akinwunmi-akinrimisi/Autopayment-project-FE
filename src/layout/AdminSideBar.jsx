@@ -19,6 +19,11 @@ const AdminSideBar = () => {
       icon: invoiceIcon,
     },
     {
+      title: "New Escrow",
+      path: "/admin/new-escrow",
+      icon: invoiceIcon,
+    },
+    {
       title: "Chat",
       path: "/admin/chat",
       icon: chatIcon,
