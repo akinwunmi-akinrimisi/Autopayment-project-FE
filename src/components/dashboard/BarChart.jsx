@@ -56,7 +56,7 @@ const BarChart = () => {
         categories: ["Label", "Label", "Label", "Label"], // Repeat categories
         labels: {
           style: {
-            colors: ["#ffffff"],
+            colors: ["#ffffff", "#ffffff", "#ffffff", "#ffffff"],
             fontSize: "14px",
           },
         },
@@ -69,10 +69,7 @@ const BarChart = () => {
       },
       yaxis: {
         labels: {
-          style: {
-            colors: ["#ffffff"], // White text
-            fontSize: "14px",
-          },
+          show: false,
         },
         title: {
           text: "Units of Measure",
