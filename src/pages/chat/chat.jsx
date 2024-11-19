@@ -203,7 +203,6 @@ const ChatInterface = () => {
         </div>
       </div>
 
-      {/* Right Sidebar */}
       <div className="w-64 border-l">
         <div className="p-4 flex items-center justify-between border-b">
           <span className="text-sm font-medium">Comments</span>

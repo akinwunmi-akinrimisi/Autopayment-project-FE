@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useWriteContract } from 'wagmi';
+import { FlexiscrowContract } from '../../Constant';
 
 const NewEscrow = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +13,14 @@ const NewEscrow = () => {
     releaseTimeout: '',
     contractData: ''
   });
+
+  const {
+    data: createData,
+    isSuccess,
+    writeContract: createEscrow,
+    isLoading: creating,
+    error: createError,
+  } = useWriteContract();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,17 +45,74 @@ const NewEscrow = () => {
     }
   }, [formData.invoiceId, formData.buyer, formData.seller, formData.completionDuration, formData.releaseTimeout]);
 
+  // Add success effect
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success('Escrow created successfully!');
+      // Reset form after successful creation
+      setFormData({
+        invoiceId: '',
+        buyer: '',
+        seller: '',
+        completionDuration: '',
+        releaseTimeout: '',
+        contractData: ''
+      });
+    }
+  }, [isSuccess]);
+
+  // Add error effect
+  useEffect(() => {
+    if (createError) {
+      toast.error(createError.message || 'Failed to create escrow');
+    }
+  }, [createError]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
-      console.log('Submitting escrow with data:', formData);
+      
+      const completionTimestamp = Math.floor(new Date(formData.completionDuration).getTime() / 1000);
+      const releaseTimestamp = Math.floor(new Date(formData.releaseTimeout).getTime() / 1000);
+      
+      
+      if (releaseTimestamp <= completionTimestamp) {
+        toast.error('Release timeout must be after completion duration');
+        return;
+      }
+
+      if (!formData.buyer.match(/^0x[a-fA-F0-9]{40}$/)) {
+        toast.error('Invalid buyer address format');
+        return;
+      }
+
+      if (!formData.seller.match(/^0x[a-fA-F0-9]{40}$/)) {
+        toast.error('Invalid seller address format');
+        return;
+      }
+
+      createEscrow({
+        address: FlexiscrowContract.address,
+        abi: FlexiscrowContract.abi,
+        functionName: "createEscrow",
+        args: [
+          formData.invoiceId,
+          formData.buyer,
+          formData.seller,
+          BigInt(completionTimestamp),
+          BigInt(releaseTimestamp)
+        ]
+      });
+      toast.success("Escrow Transaction initiated! Waiting for confirmation...");
     } catch (error) {
-      console.error('Error creating escrow:', error);
+      toast.error(error.message || 'An error occurred while creating the escrow');
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col p-8">
+      <ToastContainer position="top-right" autoClose={5000} />
       <p className="text-2xl font-bold mb-2">New Escrow</p>
       <p className="text-gray-600 mb-8">
         Fill the forms below to create a new escrow for your customer.
@@ -125,27 +194,14 @@ const NewEscrow = () => {
               required
             />
           </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contract Write Data (0xe4154edf)
-            </label>
-            <textarea
-              name="contractData"
-              value={formData.contractData}
-              rows="4"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="Contract interaction data will be generated here"
-              readOnly
-            ></textarea>
           </div>
-        </div>
-
         <button
           type="submit"
-          className="w-full mt-8 bg-pink-500 text-white py-3 px-4 rounded-lg hover:bg-pink-600 transition duration-200 font-medium"
+          disabled={creating}
+          className={`w-full mt-8 bg-pink-500 text-white py-3 px-4 rounded-lg transition duration-200 font-medium
+            ${creating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-600'}`}
         >
-          Create Escrow
+          {creating ? 'Creating Escrow...' : 'Create Escrow'}
         </button>
       </form>
     </div>
