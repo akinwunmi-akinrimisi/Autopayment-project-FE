@@ -1,0 +1,459 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_signers",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_quorum",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "_feeToken",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "AlreadyASigner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "AlreadyVoted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "EscrowContractFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "HigherVotesAgainst",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InsufficientTokenBalance",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InsufficientVotesToExecute",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidERC20TokenAddress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidQuorum",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NotASigner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NotAuthorizedSigner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ProposalAlreadyExecuted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ReentrancyGuardReentrantCall",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "SafeERC20FailedOperation",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "SignerNotFound",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "SignersRequired",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "escrowContract",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "refundAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "releaseAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+            }
+        ],
+        "name": "EscrowResolved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum Multisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            }
+        ],
+        "name": "ProposalCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            }
+        ],
+        "name": "ProposalExecuted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "voter",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "support",
+                "type": "bool"
+            }
+        ],
+        "name": "VoteCasted",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum Multisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newQuorum",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "withdrawalAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "createProposal",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            }
+        ],
+        "name": "executeProposal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "feeToken",
+        "outputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getSigners",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "voter",
+                "type": "address"
+            }
+        ],
+        "name": "hasVoted",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "voted",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "isSigner",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "proposalCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "proposals",
+        "outputs": [
+            {
+                "internalType": "enum Multisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newQuorum",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "withdrawalAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "votesFor",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "votesAgainst",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "executed",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "quorum",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "escrowContract",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "refundAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "releaseAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "resolveEscrow",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "signers",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "support",
+                "type": "bool"
+            }
+        ],
+        "name": "vote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
