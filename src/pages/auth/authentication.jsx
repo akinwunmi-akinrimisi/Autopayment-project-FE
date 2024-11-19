@@ -37,7 +37,13 @@ const SignupForm = () => {
       toast.success("Registration successful!");
       navigate("/login");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+      console.log("error", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Registration failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -239,7 +245,10 @@ const SignupForm = () => {
             <div className="text-center">
               <p className="text-gray-600">
                 Already have an account?{" "}
-                <Link to="/login" className="text-pink-500 hover:text-pink-600 font-medium">
+                <Link
+                  to="/login"
+                  className="text-pink-500 hover:text-pink-600 font-medium"
+                >
                   Login
                 </Link>
               </p>
