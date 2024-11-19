@@ -1,22 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useWriteContract } from 'wagmi';
+import { parseEther } from "ethers";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {FlexiscrowContract} from "../../Constant/index"
 
 const AdminDashboard = () => {
   const [newFees, setNewFees] = useState({
     flatFee: '0.01',
-    bps: '100'
+    bps: '100',
   });
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Dummy data
-  const dummyEscrows = [
+  const { writeContract: updateFees, data: updateData, isSuccess, isLoading: updating, error: updateError } = useWriteContract({
+  });
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success('Fees updated successfully!');
+      setNewFees({
+        flatFee: '0.01',
+        bps: '100',
+      });
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (updateError) {
+      toast.error(updateError.message || 'Failed to update fees');
+    }
+  }, [updateError]);
+
+  const handleUpdateFees = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Validate inputs
+      if (newFees.flatFee === '' || isNaN(newFees.flatFee) || parseFloat(newFees.flatFee) < 0) {
+        toast.error('Please enter a valid flat fee');
+        return;
+      }
+
+      if (
+        newFees.bps === '' ||
+        isNaN(newFees.bps) ||
+        parseFloat(newFees.bps) < 0 ||
+        parseFloat(newFees.bps) > 10000
+      ) {
+        toast.error('Basis points must be between 0 and 10000');
+        return;
+      }
+
+      // Convert ETH to Wei and ensure bps is an integer
+      const flatFeeWei = parseEther(newFees.flatFee.toString());
+      const bpsValue = BigInt(Math.floor(parseFloat(newFees.bps)));
+
+      updateFees({
+        address: FlexiscrowContract.address, 
+        abi: FlexiscrowContract.abi, 
+        functionName: 'updateFees',
+        args: [flatFeeWei, bpsValue],
+      });
+    } catch (error) {
+      toast.error(error.message || 'An error occurred while updating fees');
+    }
+  };
+
+  const Escrows = [
     {
-      invoiceId: "ESC001",
-      escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-      buyer: "0xabcdef1234567890abcdef1234567890abcdef12",
-      seller: "0x7890abcdef1234567890abcdef1234567890abcd",
-      createdAt: "2024-03-15",
-      amount: "1.5 ETH",
-      status: "Active"
+      invoiceId: 'ESC001',
+      escrowAddress: '0x1234567890abcdef1234567890abcdef12345678',
+      buyer: '0xabcdef1234567890abcdef1234567890abcdef12',
+      seller: '0x7890abcdef1234567890abcdef1234567890abcd',
+      createdAt: '2024-03-15',
+      amount: '1.5 ETH',
+      status: 'Active',
     },
     {
       invoiceId: "ESC002",
@@ -38,49 +95,36 @@ const AdminDashboard = () => {
     }
   ];
 
-  const handleUpdateFees = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
+      <ToastContainer position="top-right" autoClose={5000} />
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Escrow Details</h1>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Total Escrows Card */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-600 mb-2">Total Escrows</h2>
           <p className="text-3xl font-bold text-gray-900">15</p>
         </div>
-
-        {/* Active Escrows Card */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-600 mb-2">Active Escrows</h2>
           <p className="text-3xl font-bold text-gray-900">8</p>
         </div>
-
-        {/* Total Value Card */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-600 mb-2">Total Value Locked</h2>
           <p className="text-3xl font-bold text-gray-900">25.5 ETH</p>
         </div>
       </div>
 
-      {/* Fee Management Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Update Fees Card */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Update Fees</h2>
-          <div className="space-y-4">
+          <form onSubmit={handleUpdateFees} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Flat Fee (ETH)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Flat Fee (ETH)</label>
               <input
                 type="number"
                 value={newFees.flatFee}
@@ -102,20 +146,16 @@ const AdminDashboard = () => {
               />
             </div>
             <button
-              onClick={handleUpdateFees}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              type="submit"
+              disabled={updating}
+              className={`w-full py-3 px-4 text-white bg-pink-500 rounded-md transition duration-200 ${
+                updating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-700'
+              }`}
             >
-              Update Fees
+              {updating ? 'Updating Fees...' : 'Update Fees'}
             </button>
-            {showSuccess && (
-              <div className="bg-green-50 text-green-800 p-4 rounded-md">
-                Fees updated successfully!
-              </div>
-            )}
-          </div>
+          </form>
         </div>
-
-        {/* Current Fees Card */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Fee Structure</h2>
           <div className="space-y-4">
@@ -134,8 +174,6 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Escrows Table */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Escrows</h2>
@@ -168,7 +206,7 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {dummyEscrows.map((escrow) => (
+              {Escrows.map((escrow) => (
                 <tr key={escrow.invoiceId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {escrow.invoiceId}
