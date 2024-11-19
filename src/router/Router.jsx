@@ -15,6 +15,7 @@ import Chat from "../pages/chat/chat";
 // PAGES
 import Home from "../pages/home/Home";
 import NewEscrow from "../pages/newEscrow/NewEscrow";
+import LoginForm from "../pages/auth/login";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,6 +23,7 @@ const router = createBrowserRouter(
       {/* SAMPLE ROUTE */}
       <Route index element={<Home />} />
       <Route path="/authentication" element={<Auth />}></Route>
+      <Route path="/login" element={<LoginForm />}></Route>
 
       {/* EVERY OTHER PAGE ROUTING SHOULD BE DONE IN HERE */}
 

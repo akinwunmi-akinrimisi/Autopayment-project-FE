@@ -1,23 +1,53 @@
-import { useState } from 'react';
+import { useState } from "react";
 import logo from "../../assets/logo.svg";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+
 const SignupForm = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    isOrganization: false
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    isOrganization: false,
+    organizationName: "",
+    website: "",
+    address: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          organizationName: formData.organizationName,
+          website: formData.website,
+          address: formData.address,
+        }
+      );
+      toast.success("Registration successful!");
+      navigate("/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -25,29 +55,33 @@ const SignupForm = () => {
     <div className="min-h-screen flex">
       <div className="w-1/3 bg-[#0D4A9F] p-5 hidden md:flex flex-col items-center justify-center">
         <div className="flex flex-col items-center mb-10 space-y-5">
-          
           <div className="w-full flex justify-center">
-            <img 
-              src={logo} 
-              alt="Logo" 
+            <img
+              src={logo}
+              alt="Logo"
               className="w-[170px] h-[170px] object-contain"
             />
           </div>
-          
+
           <div className="text-center">
-            <h1 className="text-white text-3xl font-bold whitespace-nowrap">Welcome to the future</h1>
+            <h1 className="text-white text-3xl font-bold whitespace-nowrap">
+              Welcome to the future
+            </h1>
             <h1 className="text-white text-3xl font-bold">of trading.</h1>
           </div>
         </div>
       </div>
 
-          <div className="flex-1 flex items-center justify-center p-4 bg-gray-50">
+      <div className="flex-1 flex items-center justify-center p-4 bg-gray-50">
         <div className="w-full max-w-md p-8">
           <h2 className="text-2xl font-bold mb-8">Create Account</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Name
               </label>
               <input
@@ -63,7 +97,10 @@ const SignupForm = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email
               </label>
               <input
@@ -79,7 +116,10 @@ const SignupForm = () => {
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Phone Number
               </label>
               <input
@@ -103,49 +143,107 @@ const SignupForm = () => {
                 onChange={handleChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="isOrganization" className="ml-2 block text-sm text-gray-700">
+              <label
+                htmlFor="isOrganization"
+                className="ml-2 block text-sm text-gray-700"
+              >
                 Are you signing up as an organization?
               </label>
             </div>
 
+            {formData.isOrganization && (
+              <>
+                <div>
+                  <label
+                    htmlFor="organizationName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Organization Name
+                  </label>
+                  <input
+                    type="text"
+                    id="organizationName"
+                    name="organizationName"
+                    value={formData.organizationName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="Enter Organization Name"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="website"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Website
+                  </label>
+                  <input
+                    type="url"
+                    id="website"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="Enter Website"
+                  />
+                </div>
+              </>
+            )}
+
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Organization Name
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Password
               </label>
               <input
-                type="name"
-                id="name"
-                name="name"
-                value={formData.email}
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="Enter Organization Name"
+                placeholder="Enter Password"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Website
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Address
               </label>
-              <input
-                type="name"
-                id="name"
-                name="name"
-                value={formData.email}
+              <textarea
+                id="address"
+                name="address"
+                value={formData.address}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="Enter Website"
-                required
+                placeholder="Enter Address"
+                rows="3"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-pink-500 text-white py-3 px-4 rounded-lg hover:bg-pink-600 transition duration-200 font-medium"
+              disabled={loading}
+              className="w-full bg-pink-500 text-white py-3 px-4 rounded-lg hover:bg-pink-600 transition duration-200 font-medium disabled:bg-pink-300 disabled:cursor-not-allowed"
             >
-              Submit
+              {loading ? "Please wait..." : "Submit"}
             </button>
+
+            <div className="text-center">
+              <p className="text-gray-600">
+                Already have an account?{" "}
+                <Link to="/login" className="text-pink-500 hover:text-pink-600 font-medium">
+                  Login
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>

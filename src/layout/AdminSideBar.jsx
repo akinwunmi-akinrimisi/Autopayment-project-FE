@@ -3,11 +3,17 @@ import logo from "../assets/logo.svg";
 import dashboardIcon from "../assets/sidebar/dashboard_icon.svg";
 import invoiceIcon from "../assets/sidebar/invoice_icon.svg";
 import chatIcon from "../assets/sidebar/chat_icon.svg";
+import { House } from "lucide-react";
 
 const AdminSideBar = () => {
   const location = useLocation();
 
   const sidebarLinks = [
+    {
+      title: "Home",
+      path: "/",
+      icon: <House className="text-white" size={24} />,
+    },
     {
       title: "Dashboard",
       path: "/admin/dashboard",
@@ -48,7 +54,11 @@ const AdminSideBar = () => {
             className={`flex items-center gap-3 h-[45px] pl-[12px] rounded-[10px] cursor-pointer transition-all duration-300 
               ${location.pathname === link.path ? 'bg-[#1F4983]' : 'hover:bg-[#1F4983]'}`}
           >
-            <img src={link.icon} alt={`${link.title} Icon`} />
+            {typeof link.icon === 'string' ? (
+              <img src={link.icon} alt={`${link.title} Icon`} />
+            ) : (
+              link.icon
+            )}
             <p className="text-[#FFFFFF] text-[18px] font-medium">{link.title}</p>
           </Link>
         ))}
