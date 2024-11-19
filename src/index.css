@@ -4,4 +4,13 @@
 
 body {
   margin: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+p {
+  margin: 0;
+}
+
+.home-page {
+  background: #F6F9FF;
 }
