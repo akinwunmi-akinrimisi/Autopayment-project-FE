@@ -18,10 +18,10 @@ const HowItWorks = () => {
           <p className="text-[24px] font-semibold leading-[36px]">
             Initiate Escrow Transaction
           </p>
-          <p className="text-[22px] font-normal leading-[33px] text-[#333333CC]">
+          <p className="text-[22px] font-normal leading-[33px] text-text">
             Buyer selects a service or product and deposits the agreed amount
             into a secure Web3 escrow. Funds are safely held until the
-            transaction is completed.r
+            transaction is completed.
           </p>
         </div>
         <div className="flex items-center">
@@ -39,7 +39,7 @@ const HowItWorks = () => {
           <p className="text-[24px] font-semibold leading-[36px]">
             Deliver and Confirm
           </p>
-          <p className="text-[22px] font-normal leading-[33px] text-[#333333CC]">
+          <p className="text-[22px] font-normal leading-[33px] text-text">
             The platform provides real-time updates, allowing the buyer to track
             the status and progress of the delivery. Once the buyer receives the
             product or service, they have the opportunity to review it for
@@ -53,7 +53,7 @@ const HowItWorks = () => {
           <p className="text-[24px] font-semibold leading-[36px]">
             Automatic Release
           </p>
-          <p className="text-[22px] font-normal leading-[33px] text-[#333333CC]">
+          <p className="text-[22px] font-normal leading-[33px] text-text">
             Upon buyer confirmation, funds are released to the seller instantly.
             Every transaction is transparently recorded on the blockchain for
             complete trust and security.{" "}

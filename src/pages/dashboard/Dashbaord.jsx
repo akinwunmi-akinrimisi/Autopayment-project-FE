@@ -1,7 +1,8 @@
 import React from 'react'
-import { widgetsData } from './components/data'
-import Widget from './components/Widget'
-import Table from './components/Table'
+import { widgetsData } from '../../components/dashboard/data'
+import Widget from '../../components/dashboard/Widget'
+import Table from '../../components/dashboard/Table'
+import BarChart from '../../components/dashboard/BarChart'
 
 
 const Dashbaord = () => {
@@ -18,7 +19,10 @@ const Dashbaord = () => {
           />
         ))}
       </div>
-      <Table/>
+      <div className='my-10 bg-primary-dark'>
+        <BarChart/>
+      </div>
+      <Table />
     </div>
   )
 }
