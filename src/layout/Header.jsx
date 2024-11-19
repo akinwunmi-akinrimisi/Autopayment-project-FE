@@ -4,10 +4,19 @@ import logo from "../assets/logo.svg";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from 'wagmi';
 import { toast } from "react-toastify";
+import { useEffect } from 'react';
 
 const Header = () => {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
+
+  useEffect(() => {
+    if (!isConnected && localStorage.getItem('flexi_session')) {
+      localStorage.removeItem('flexi_session');
+      toast.info('Logged out successfully');
+      navigate('/');
+    }
+  }, [isConnected, navigate]);
 
   const handleDashboardClick = (e) => {
     e.preventDefault();
@@ -42,7 +51,7 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        {isConnected && (
+        {isConnected && !localStorage.getItem('flexi_session') && (
           <button 
             onClick={() => navigate('/login')}
             className="h-[42px] bg-[#EA3982] w-fit px-4 rounded-[10px] text-[#FFFFFF] font-medium hover:scale-[102%] transition-all duration-100"
