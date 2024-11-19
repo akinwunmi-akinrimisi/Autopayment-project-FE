@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { useWriteContract } from 'wagmi';
+import { useWriteContract, useAccount } from 'wagmi';
 import { parseEther } from "ethers";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {FlexiscrowContract} from "../../Constant/index"
+import { FlexiscrowContract } from "../../Constant/index";
 
 const AdminDashboard = () => {
+  const { address: connectedAddress, isConnected } = useAccount();
+  const ADMIN_ADDRESS = "0x6BF7d6b94282BD48ff458599aDafA268BcB009FF";
+  
   const [newFees, setNewFees] = useState({
     flatFee: '0.01',
     bps: '100',
   });
 
-  const { writeContract: updateFees, data: updateData, isSuccess, isLoading: updating, error: updateError } = useWriteContract({
-  });
+  const { writeContract: updateFees, data: updateData, isSuccess, isLoading: updating, error: updateError } = useWriteContract({});
+
+  const isAdmin = isConnected && connectedAddress?.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
+
+  // useEffect(() => {
+  //   if (!isConnected) {
+  //     toast.warning('Please connect your wallet to access admin features');
+  //   } else if (connectedAddress && !isAdmin) {
+  //     // toast.warning('Connected wallet is not authorized as admin');
+  //   }
+  // }, [isConnected, connectedAddress, isAdmin]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -32,6 +44,16 @@ const AdminDashboard = () => {
 
   const handleUpdateFees = async (e) => {
     e.preventDefault();
+
+    if (!isConnected) {
+      toast.error('Please connect your wallet');
+      return;
+    }
+
+    if (!isAdmin) {
+      toast.error('Unauthorized: Only admin can update fees');
+      return;
+    }
 
     try {
       // Validate inputs
@@ -95,13 +117,22 @@ const AdminDashboard = () => {
     }
   ];
 
-
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <ToastContainer position="top-right" autoClose={5000} />
 
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Escrow Details</h1>
+        {!isConnected && (
+          <div className="text-yellow-600 bg-yellow-50 px-4 py-2 rounded-md">
+            Please connect your wallet
+          </div>
+        )}
+        {/* {isConnected && !isAdmin && (
+          <div className="text-red-600 bg-red-50 px-4 py-2 rounded-md">
+            Not authorized as admin
+          </div>
+        )} */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -119,61 +150,64 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Update Fees</h2>
-          <form onSubmit={handleUpdateFees} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Flat Fee (ETH)</label>
-              <input
-                type="number"
-                value={newFees.flatFee}
-                onChange={(e) => setNewFees({ ...newFees, flatFee: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0.01"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Basis Points (1 = 0.01%)
-              </label>
-              <input
-                type="number"
-                value={newFees.bps}
-                onChange={(e) => setNewFees({ ...newFees, bps: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="100"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={updating}
-              className={`w-full py-3 px-4 text-white bg-pink-500 rounded-md transition duration-200 ${
-                updating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-700'
-              }`}
-            >
-              {updating ? 'Updating Fees...' : 'Update Fees'}
-            </button>
-          </form>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Fee Structure</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-700">Flat Fee:</span>
-              <span className="text-gray-900">0.01 ETH</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-700">Percentage Fee:</span>
-              <span className="text-gray-900">1% (100 bps)</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-700">Last Updated:</span>
-              <span className="text-gray-900">2024-03-15</span>
+      {isAdmin && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Update Fees</h2>
+            <form onSubmit={handleUpdateFees} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Flat Fee (ETH)</label>
+                <input
+                  type="number"
+                  value={newFees.flatFee}
+                  onChange={(e) => setNewFees({ ...newFees, flatFee: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Basis Points (1 = 0.01%)
+                </label>
+                <input
+                  type="number"
+                  value={newFees.bps}
+                  onChange={(e) => setNewFees({ ...newFees, bps: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="100"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={updating}
+                className={`w-full py-3 px-4 text-white bg-pink-500 rounded-md transition duration-200 ${
+                  updating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-700'
+                }`}
+              >
+                {updating ? 'Updating Fees...' : 'Update Fees'}
+              </button>
+            </form>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Fee Structure</h2>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-700">Flat Fee:</span>
+                <span className="text-gray-900">0.01 ETH</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-700">Percentage Fee:</span>
+                <span className="text-gray-900">1% (100 bps)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-700">Last Updated:</span>
+                <span className="text-gray-900">2024-03-15</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-sm">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Escrows</h2>
