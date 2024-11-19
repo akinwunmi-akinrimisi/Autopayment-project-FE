@@ -5,20 +5,20 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Header = () => {
   return (
-    <div className="max:w-full w-full h-[100px] bg-[#0D4A9F] flex items-center justify-between pl-[106px] pr-[84px]">
+    <div className="max:w-full w-full h-[100px] bg-[#0D4A9F] flex items-center justify-between pl-[106px] pr-[84px] fixed top-0 z-50">
       <img src={logo} alt="LEXISCROW" />
 
       <div>
         <ul className="flex items-center gap-10">
-          <li className="text-[#FFFFFF] text-[24px] font-medium">
+          <li className="text-[#FFE2E0] text-[24px] font-medium">
             <NavLink>Home</NavLink>
           </li>
 
-          <li className="text-[#FFFFFF] text-[24px] font-medium">
+          <li className="text-[#FFE2E0] text-[24px] font-medium">
             <NavLink>About Us</NavLink>
           </li>
 
-          <li className="text-[#FFFFFF] text-[24px] font-medium">
+          <li className="text-[#FFE2E0] text-[24px] font-medium">
             <NavLink to="/admin/dashboard">Dashboard</NavLink>
           </li>
         </ul>

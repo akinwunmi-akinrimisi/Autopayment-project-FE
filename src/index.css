@@ -12,5 +12,9 @@ p {
 }
 
 .home-page {
-  background: #F6F9FF;
+  background: #EFF7FF;
+
+}
+[data-rk] .ju367v9i {
+  background: #EA3982 !important; /* Your custom color */
 }

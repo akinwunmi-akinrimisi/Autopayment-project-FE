@@ -28,7 +28,7 @@ const LearnAboutUs = () => {
           </div>
 
           <div className="w-[310px] h-[113px] bg-white rounded-[10px] flex items-center justify-center p-5">
-            <p className="text-[18px] font-medium text-center text-[#0D4A9F]">
+            <p className="text-[18px] font-medium text-center text-text">
               Award-Winning Crypto Payment Company in Africa.
             </p>
           </div>
@@ -37,7 +37,7 @@ const LearnAboutUs = () => {
         <img src={bitcoin} alt="bitcoin" className="absolute -top-8 right-0 "/>
       </div>
 
-      <button className="text-white px-4 py-2 rounded-md w-[215px] h-[70px] bg-[#EA3982] hover:scale-[101%] transition-all duration-200 mt-[10px] ">
+      <button className="text-white px-4 py-2 rounded-md w-[215px] h-[70px] bg-btn_bg hover:scale-[101%] transition-all duration-200 mt-[10px] ">
         Learn More...
       </button>
     </div>

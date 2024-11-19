@@ -30,7 +30,7 @@ const Widget = ({
           size: "65%",
         },
         stroke: {
-          show: true,
+          show: false,
         width: 0, 
         },
       },
@@ -54,7 +54,7 @@ const Widget = ({
     <div className=' rounded-md bg-[#143869] py-3 px-4 w-full max-w-[350px]'>
       <div className="flex items-center">
         <div className='flex-1 text-white' >
-          <div className="text-xl font-medium py-2">{title}</div>
+          <div className="text-xl font-medium py-1">{title}</div>
           <div className='text-[28px] font-semibold'>{amount}</div>
         </div>
         <div className="flex-1">
