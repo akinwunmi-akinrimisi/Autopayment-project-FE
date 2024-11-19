@@ -23,7 +23,7 @@ import {
 
 const config = getDefaultConfig({
     appName: 'My RainbowKit App',
-    projectId: 'import.meta.env.VITE_APPKIT_PROJECT_ID',
+    projectId: import.meta.env.VITE_APPKIT_PROJECT_ID,
     chains: [liskSepolia, polygon, optimism, arbitrum, base],
     ssr: true, 
   });
