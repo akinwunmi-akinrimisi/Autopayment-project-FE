@@ -203,11 +203,6 @@
             },
             {
                 "internalType": "address",
-                "name": "buyer",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
                 "name": "seller",
                 "type": "address"
             },

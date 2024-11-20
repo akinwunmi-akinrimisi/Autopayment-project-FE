@@ -52,7 +52,6 @@ const NewEscrow = () => {
       // Reset form after successful creation
       setFormData({
         invoiceId: '',
-        buyer: '',
         seller: '',
         completionDuration: '',
         releaseTimeout: '',
@@ -82,10 +81,6 @@ const NewEscrow = () => {
         return;
       }
 
-      if (!formData.buyer.match(/^0x[a-fA-F0-9]{40}$/)) {
-        toast.error('Invalid buyer address format');
-        return;
-      }
 
       if (!formData.seller.match(/^0x[a-fA-F0-9]{40}$/)) {
         toast.error('Invalid seller address format');
@@ -98,7 +93,6 @@ const NewEscrow = () => {
         functionName: "createEscrow",
         args: [
           formData.invoiceId,
-          formData.buyer,
           formData.seller,
           BigInt(completionTimestamp),
           BigInt(releaseTimestamp)
@@ -135,21 +129,6 @@ const NewEscrow = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Buyer Address
-            </label>
-            <input
-              type="text"
-              name="buyer"
-              value={formData.buyer}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              placeholder="Enter Buyer's Ethereum Address"
-              pattern="^0x[a-fA-F0-9]{40}$"
-              required
-            />
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
