@@ -7,7 +7,7 @@ import { FlexiscrowContract } from "../../Constant/index";
 
 const AdminDashboard = () => {
   const { address: connectedAddress, isConnected } = useAccount();
-  const ADMIN_ADDRESS = "0x6BF7d6b94282BD48ff458599aDafA268BcB009FF";
+  const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
   const [escrowDetails, setEscrowDetails] = useState({});
 
