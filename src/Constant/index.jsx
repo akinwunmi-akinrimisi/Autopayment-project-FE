@@ -2,7 +2,7 @@ import FlexiscrowAbi from "../ABI/Flexiscrow.json";
 import MultisigAbi from "../ABI/Multisig.json";
 
 export const FlexiscrowContract = {
-    address: "0x9B84831d24fb998a1231E63961ECe5888E9f503F",
+    address: "0x3928F62ccfd6CBE605a9630ab4a7f40fdE743F65",
     abi: FlexiscrowAbi,
   };
 
