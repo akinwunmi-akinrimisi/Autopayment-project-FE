@@ -20,10 +20,12 @@ const LoginForm = () => {
         `${import.meta.env.VITE_BASE_URL}/users/login`,
         formData
       );
+
+      console.log('response', response);
       
       // Store the response data in localStorage properly
       localStorage.setItem('flexi_session', JSON.stringify(response.data.data.session));
-    //   localStorage.setItem('flexi_user', JSON.stringify(response.data.data.user));
+      localStorage.setItem('flexi_user', JSON.stringify(response.data.data.user));
       
       toast.success("Login successful!");
       navigate("/");
