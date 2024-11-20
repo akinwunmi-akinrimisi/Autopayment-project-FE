@@ -8,11 +8,12 @@ const SignupForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     password: "",
-    isOrganization: false,
+    role: "Customer",
     organizationName: "",
     website: "",
     address: "",
@@ -25,10 +26,12 @@ const SignupForm = () => {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/users/register`,
         {
-          name: formData.name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
+          role: formData.role,
           organizationName: formData.organizationName,
           website: formData.website,
           address: formData.address,
@@ -84,23 +87,86 @@ const SignupForm = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Name
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                First Name
               </label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="Enter Name"
+                placeholder="Enter First Name"
                 required
               />
             </div>
+
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                placeholder="Enter Last Name"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              >
+                <option value="Customer">Customer</option>
+                <option value="Vendor">Vendor</option>
+              </select>
+            </div>
+
+            {formData.role === "Vendor" && (
+              <>
+                <div>
+                  <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Organization Name
+                  </label>
+                  <input
+                    type="text"
+                    id="organizationName"
+                    name="organizationName"
+                    value={formData.organizationName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="Enter Organization Name"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
+                    Website
+                  </label>
+                  <input
+                    type="url"
+                    id="website"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="Enter Website"
+                  />
+                </div>
+              </>
+            )}
 
             <div>
               <label
@@ -139,63 +205,6 @@ const SignupForm = () => {
                 required
               />
             </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isOrganization"
-                name="isOrganization"
-                checked={formData.isOrganization}
-                onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="isOrganization"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                Are you signing up as an organization?
-              </label>
-            </div>
-
-            {formData.isOrganization && (
-              <>
-                <div>
-                  <label
-                    htmlFor="organizationName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Organization Name
-                  </label>
-                  <input
-                    type="text"
-                    id="organizationName"
-                    name="organizationName"
-                    value={formData.organizationName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                    placeholder="Enter Organization Name"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="website"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Website
-                  </label>
-                  <input
-                    type="url"
-                    id="website"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                    placeholder="Enter Website"
-                  />
-                </div>
-              </>
-            )}
 
             <div>
               <label
