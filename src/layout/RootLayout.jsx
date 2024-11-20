@@ -30,7 +30,7 @@ const RootLayout = () => {
           <AdminHeader />
 
           {/* MAIN CONTENT */}
-          <div className="p-10 overflow-y-auto h-[calc(100vh-64px)]z">
+          <div className="p-10 overflow-y-auto h-[calc(100vh-64px)]">
             <Outlet />
           </div>
         </div>
