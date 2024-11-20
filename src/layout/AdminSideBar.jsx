@@ -7,6 +7,7 @@ import { House } from "lucide-react";
 
 const AdminSideBar = () => {
   const location = useLocation();
+  const flexiUser = JSON.parse(localStorage.getItem('flexi_user'));
 
   const sidebarLinks = [
     {
@@ -19,11 +20,11 @@ const AdminSideBar = () => {
       path: "/admin/dashboard",
       icon: dashboardIcon,
     },
-    {
+    ...(flexiUser?.role !== 'vendor' ? [{
       title: "Invoice",
       path: "/admin/invoice",
       icon: invoiceIcon,
-    },
+    }] : []),
     {
       title: "New Escrow",
       path: "/admin/new-escrow",
