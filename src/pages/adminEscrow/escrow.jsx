@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useWriteContract, useAccount } from 'wagmi';
+import { useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { parseEther } from "ethers";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,23 +8,85 @@ import { FlexiscrowContract } from "../../Constant/index";
 const AdminDashboard = () => {
   const { address: connectedAddress, isConnected } = useAccount();
   const ADMIN_ADDRESS = "0x6BF7d6b94282BD48ff458599aDafA268BcB009FF";
-  
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [escrowDetails, setEscrowDetails] = useState({});
+
   const [newFees, setNewFees] = useState({
     flatFee: '0.01',
     bps: '100',
   });
 
+  const [escrows, setEscrows] = useState([
+    {
+      invoiceId: '1',
+      seller: '0x6BF7d6b94282BD48ff458599aDafA268BcB009FF',
+      completionDuration: 7 * 24 * 60 * 60, // 7 days in seconds
+      releaseTimeout: 2 * 24 * 60 * 60, // 2 days in seconds
+      createdAt: '2024-03-15',
+      status: 'Pending',
+      isApproved: false,
+    },
+    {
+      invoiceId: "2",
+      seller: "0x890abcdef1234567890abcdef1234567890abcde",
+      completionDuration: 14 * 24 * 60 * 60, // 14 days in seconds
+      releaseTimeout: 3 * 24 * 60 * 60, // 3 days in seconds
+      createdAt: "2024-03-14",
+      status: 'Pending',
+      isApproved: false,
+    },
+    {
+      invoiceId: "3",
+      seller: "0x7890abcdef1234567890abcdef1234567890abcd",
+      completionDuration: 30 * 24 * 60 * 60, // 30 days in seconds
+      releaseTimeout: 5 * 24 * 60 * 60, // 5 days in seconds
+      createdAt: "2024-03-13",
+      status: 'Pending',
+      isApproved: false,
+    }
+  ]); 
+
   const { writeContract: updateFees, data: updateData, isSuccess, isLoading: updating, error: updateError } = useWriteContract({});
+
+  const { writeContract: createEscrow, isLoading: creatingEscrow } = useWriteContract();
+
+  const { data: escrowData, isError: isReadError, isLoading: isReadLoading, refetch } = useReadContract({
+    address: FlexiscrowContract.address,
+    abi: FlexiscrowContract.abi,
+    functionName: 'getEscrowDetails',
+    args: selectedInvoiceId ? [selectedInvoiceId] : undefined,
+    enabled: !!selectedInvoiceId,
+  });
 
   const isAdmin = isConnected && connectedAddress?.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
 
-  // useEffect(() => {
-  //   if (!isConnected) {
-  //     toast.warning('Please connect your wallet to access admin features');
-  //   } else if (connectedAddress && !isAdmin) {
-  //     // toast.warning('Connected wallet is not authorized as admin');
-  //   }
-  // }, [isConnected, connectedAddress, isAdmin]);
+  useEffect(() => {
+    if (escrowData && selectedInvoiceId) {
+      const [escrowAddress, buyer, seller, createdAt] = escrowData;
+      setEscrowDetails(prev => ({
+        ...prev,
+        [selectedInvoiceId]: {
+          escrowAddress,
+          buyer,
+          seller,
+          createdAt: new Date(Number(createdAt) * 1000).toLocaleDateString(),
+        }
+      }));
+    }
+  }, [escrowData, selectedInvoiceId]);
+
+  const handleViewDetails = async (invoiceId) => {
+    if (!isAdmin) {
+      toast.error('Only admin can view escrow details');
+      return;
+    }
+    setSelectedInvoiceId(invoiceId);
+    try {
+      await refetch();
+    } catch (error) {
+      toast.error('Failed to fetch escrow details');
+    }
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -56,7 +118,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Validate inputs
+      
       if (newFees.flatFee === '' || isNaN(newFees.flatFee) || parseFloat(newFees.flatFee) < 0) {
         toast.error('Please enter a valid flat fee');
         return;
@@ -87,35 +149,60 @@ const AdminDashboard = () => {
     }
   };
 
-  const Escrows = [
-    {
-      invoiceId: 'ESC001',
-      escrowAddress: '0x1234567890abcdef1234567890abcdef12345678',
-      buyer: '0xabcdef1234567890abcdef1234567890abcdef12',
-      seller: '0x7890abcdef1234567890abcdef1234567890abcd',
-      createdAt: '2024-03-15',
-      amount: '1.5 ETH',
-      status: 'Active',
-    },
-    {
-      invoiceId: "ESC002",
-      escrowAddress: "0x2345678901abcdef2345678901abcdef23456789",
-      buyer: "0xbcdef1234567890abcdef1234567890abcdef123",
-      seller: "0x890abcdef1234567890abcdef1234567890abcde",
-      createdAt: "2024-03-14",
-      amount: "2.0 ETH",
-      status: "Completed"
-    },
-    {
-      invoiceId: "ESC003",
-      escrowAddress: "0x3456789012abcdef3456789012abcdef34567890",
-      buyer: "0xcdef1234567890abcdef1234567890abcdef1234",
-      seller: "0x90abcdef1234567890abcdef1234567890abcdef",
-      createdAt: "2024-03-13",
-      amount: "0.5 ETH",
-      status: "Active"
+  const handleCreateEscrow = async (escrow) => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet');
+      return;
     }
-  ];
+
+    if (!isAdmin) {
+      toast.error('Unauthorized: Only admin can approve escrows');
+      return;
+    }
+
+    try {
+       createEscrow({
+        address: FlexiscrowContract.address,
+        abi: FlexiscrowContract.abi,
+        functionName: 'createEscrow',
+        args: [
+          escrow.invoiceId,
+          escrow.seller,
+          BigInt(escrow.completionDuration),
+          BigInt(escrow.releaseTimeout)
+        ],
+      });
+      
+      // Update the local state to reflect the change
+      setEscrows(prevEscrows => 
+        prevEscrows.map(e => 
+          e.invoiceId === escrow.invoiceId 
+            ? { ...e, status: 'Active', isApproved: true }
+            : e
+        )
+      );
+
+      toast.success(`Escrow ${escrow.invoiceId} created successfully!`);
+    } catch (error) {
+      toast.error(`Failed to create escrow: ${error.message}`);
+      // Update status to reflect failure
+      setEscrows(prevEscrows => 
+        prevEscrows.map(e => 
+          e.invoiceId === escrow.invoiceId 
+            ? { ...e, status: 'Failed' }
+            : e
+        )
+      );
+    }
+  };
+
+  const formatDuration = (seconds) => {
+    const days = Math.floor(seconds / (24 * 60 * 60));
+    return `${days} days`;
+  };
+
+
+  
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -208,7 +295,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm">
+<div className="bg-white rounded-lg shadow-sm">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Escrows</h2>
         </div>
@@ -220,16 +307,13 @@ const AdminDashboard = () => {
                   Invoice ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Escrow Address
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Buyer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Seller
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Completion Duration
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Release Timeout
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created At
@@ -237,39 +321,100 @@ const AdminDashboard = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {Escrows.map((escrow) => (
-                <tr key={escrow.invoiceId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {escrow.invoiceId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                    {`${escrow.escrowAddress.slice(0, 6)}...${escrow.escrowAddress.slice(-4)}`}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                    {`${escrow.buyer.slice(0, 6)}...${escrow.buyer.slice(-4)}`}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                    {`${escrow.seller.slice(0, 6)}...${escrow.seller.slice(-4)}`}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {escrow.amount}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {escrow.createdAt}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-sm rounded-full ${
-                      escrow.status === 'Active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {escrow.status}
-                    </span>
-                  </td>
-                </tr>
+              {escrows.map((escrow) => (
+                <React.Fragment key={escrow.invoiceId}>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {escrow.invoiceId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                      {`${escrow.seller.slice(0, 6)}...${escrow.seller.slice(-4)}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatDuration(escrow.completionDuration)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatDuration(escrow.releaseTimeout)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {escrow.createdAt}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-sm rounded-full ${
+                        escrow.status === 'Active' 
+                          ? 'bg-green-100 text-green-800'
+                          : escrow.status === 'Failed'
+                          ? 'bg-red-100 text-red-800'
+                          : escrow.status === 'Pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {escrow.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {!escrow.isApproved && escrow.status !== 'Failed' ? (
+                        <button
+                          onClick={() => handleCreateEscrow(escrow)}
+                          disabled={creatingEscrow || !isAdmin}
+                          className={`px-4 py-2 text-sm font-medium rounded-md ${
+                            isAdmin
+                              ? 'bg-pink-500 text-white hover:bg-pink-600'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          } ${creatingEscrow ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {creatingEscrow ? 'Approving...' : 'Approve'}
+                        </button>
+                      ) : escrow.status === 'Active' && isAdmin && (
+                        <button
+                          onClick={() => handleViewDetails(escrow.invoiceId)}
+                          disabled={isReadLoading}
+                          className="px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                          {isReadLoading && selectedInvoiceId === escrow.invoiceId ? 'Loading...' : 'View Details'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                  {escrowDetails[escrow.invoiceId] && (
+                    <tr className="bg-gray-50">
+                      <td colSpan="7" className="px-6 py-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Escrow Address</p>
+                            <p className="text-sm font-mono text-gray-900">
+                              {`${escrowDetails[escrow.invoiceId].escrowAddress.slice(0, 6)}...${escrowDetails[escrow.invoiceId].escrowAddress.slice(-4)}`}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Buyer</p>
+                            <p className="text-sm font-mono text-gray-900">
+                              {`${escrowDetails[escrow.invoiceId].buyer.slice(0, 6)}...${escrowDetails[escrow.invoiceId].buyer.slice(-4)}`}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Seller</p>
+                            <p className="text-sm font-mono text-gray-900">
+                              {`${escrowDetails[escrow.invoiceId].seller.slice(0, 6)}...${escrowDetails[escrow.invoiceId].seller.slice(-4)}`}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Created At</p>
+                            <p className="text-sm text-gray-900">
+                              {escrowDetails[escrow.invoiceId].createdAt}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
