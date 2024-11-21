@@ -40,6 +40,11 @@ const AdminSideBar = () => {
       path: "/admin/escrow",
       icon: invoiceIcon,
     },
+    {
+      title: "Dispute",
+      path: "/admin/dispute",
+      icon: invoiceIcon,
+    },
   ];
 
   return (
