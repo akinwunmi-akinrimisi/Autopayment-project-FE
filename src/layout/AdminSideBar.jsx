@@ -25,11 +25,11 @@ const AdminSideBar = () => {
       path: "/admin/invoice",
       icon: invoiceIcon,
     }] : []),
-    {
-      title: "New Escrow",
-      path: "/admin/new-escrow",
-      icon: invoiceIcon,
-    },
+    // {
+    //   title: "New Escrow",
+    //   path: "/admin/new-escrow",
+    //   icon: invoiceIcon,
+    // },
     {
       title: "Chat",
       path: "/admin/chat",
@@ -57,7 +57,7 @@ const AdminSideBar = () => {
           <Link
             key={index}
             to={link.path}
-            className={`flex items-center gap-3 h-[45px] pl-[12px] rounded-[10px] cursor-pointer transition-all duration-300 
+            className={`flex items-center gap-3 h-[45px] pl-[12px] rounded-[10px] cursor-pointer transition-all duration-300 no-underline 
               ${location.pathname === link.path ? 'bg-[#1F4983]' : 'hover:bg-[#1F4983]'}`}
           >
             {typeof link.icon === 'string' ? (
@@ -65,7 +65,7 @@ const AdminSideBar = () => {
             ) : (
               link.icon
             )}
-            <p className="text-[#FFFFFF] text-[18px] font-medium">{link.title}</p>
+            <p className="text-[#FFFFFF] text-[18px] font-medium m-0">{link.title}</p>
           </Link>
         ))}
       </div>

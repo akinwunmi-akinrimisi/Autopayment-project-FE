@@ -5,6 +5,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FlexiscrowContract } from "../../Constant/index";
 import axiosInstance from '../../utils/axios';
+import { Modal, Button } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminDashboard = () => {
   const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
@@ -37,6 +39,9 @@ const AdminDashboard = () => {
   console.log("connectedAddress object:", connectedAddress);
   console.log("address:", connectedAddress?.address);
   console.log("role:", connectedAddress?.role);
+
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [selectedEscrow, setSelectedEscrow] = useState(null);
 
   useEffect(() => {
     if (escrowData && selectedInvoiceId) {
@@ -164,6 +169,11 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleApprovalClick = (escrow) => {
+    setSelectedEscrow(escrow);
+    setShowApprovalModal(true);
+  };
+
   const handleCreateEscrow = async (escrow) => {
     if (!connectedAddress?.address) {
       toast.error('Please connect your wallet');
@@ -176,7 +186,7 @@ const AdminDashboard = () => {
     }
 
     try {
-       createEscrow({
+      createEscrow({
         address: FlexiscrowContract.address,
         abi: FlexiscrowContract.abi,
         functionName: 'createEscrow',
@@ -188,7 +198,6 @@ const AdminDashboard = () => {
         ],
       });
       
-      // Update the local state to reflect the change
       setEscrows(prevEscrows => 
         prevEscrows.map(e => 
           e.invoiceId === escrow.invoiceId 
@@ -198,9 +207,9 @@ const AdminDashboard = () => {
       );
 
       toast.success(`Escrow ${escrow.invoiceId} created successfully!`);
+      setShowApprovalModal(false);
     } catch (error) {
       toast.error(`Failed to create escrow: ${error.message}`);
-      // Update status to reflect failure
       setEscrows(prevEscrows => 
         prevEscrows.map(e => 
           e.invoiceId === escrow.invoiceId 
@@ -209,6 +218,18 @@ const AdminDashboard = () => {
         )
       );
     }
+  };
+
+  const handleRejectEscrow = (escrow) => {
+    setEscrows(prevEscrows => 
+      prevEscrows.map(e => 
+        e.invoiceId === escrow.invoiceId 
+          ? { ...e, status: 'Rejected', isApproved: false }
+          : e
+      )
+    );
+    toast.info(`Escrow ${escrow.invoiceId} rejected`);
+    setShowApprovalModal(false);
   };
 
   const formatDuration = (seconds) => {
@@ -379,15 +400,15 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {!escrow.isApproved && escrow.status !== 'Failed' ? (
                           <button
-                            onClick={() => handleCreateEscrow(escrow)}
-                            disabled={creatingEscrow || !isConnected}
+                            onClick={() => handleApprovalClick(escrow)}
+                            disabled={!isConnected}
                             className={`px-4 py-2 text-sm font-medium rounded-md ${
                               isConnected
                                 ? 'bg-pink-500 text-white hover:bg-pink-600'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            } ${creatingEscrow ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            }`}
                           >
-                            {creatingEscrow ? 'Approving...' : 'Approve'}
+                            Approve
                           </button>
                         ) : escrow.status === 'Active' && isConnected && (
                           <button
@@ -439,6 +460,69 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
+      <Modal show={showApprovalModal} onHide={() => setShowApprovalModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Approve Escrow</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedEscrow && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <p className="text-sm font-medium text-gray-500">Invoice ID</p>
+                  <p className="text-sm font-medium text-gray-900">{selectedEscrow.invoiceId}</p>
+                </div>
+                <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <p className="text-sm font-medium text-gray-500">Product Name</p>
+                  <p className="text-sm font-medium text-gray-900">{selectedEscrow.productName}</p>
+                </div>
+                <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <p className="text-sm font-medium text-gray-500">Seller</p>
+                  <p className="text-sm font-mono text-gray-900">
+                    {`${selectedEscrow.seller.slice(0, 6)}...${selectedEscrow.seller.slice(-4)}`}
+                  </p>
+                </div>
+                <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <p className="text-sm font-medium text-gray-500">Price</p>
+                  <p className="text-sm font-medium text-gray-900">{selectedEscrow.price} ETH</p>
+                </div>
+                <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200  '>
+                  <p className="text-sm font-medium text-gray-500">Release Timeout</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {formatDuration(selectedEscrow.releaseTimeout)}
+                  </p>
+                </div>
+                <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <p className="text-sm font-medium text-gray-500">Created At</p>
+                  <p className="text-sm font-medium text-gray-900">{selectedEscrow.createdAt}</p>
+                </div>
+              </div>
+              <div className='flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                <p className="text-sm font-medium text-gray-500">Description</p>
+                <p className="text-sm text-gray-900">{selectedEscrow.description}</p>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="danger" 
+            onClick={() => handleRejectEscrow(selectedEscrow)}
+            disabled={creatingEscrow}
+            className='bg-red-500'
+          >
+            Reject
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={() => handleCreateEscrow(selectedEscrow)}
+            disabled={creatingEscrow}
+          >
+            {creatingEscrow ? 'Approving...' : 'Approve'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
