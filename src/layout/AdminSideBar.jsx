@@ -25,11 +25,11 @@ const AdminSideBar = () => {
       path: "/admin/invoice",
       icon: invoiceIcon,
     }] : []),
-    // {
-    //   title: "New Escrow",
-    //   path: "/admin/new-escrow",
-    //   icon: invoiceIcon,
-    // },
+    {
+      title: "New Escrow",
+      path: "/admin/new-escrow",
+      icon: invoiceIcon,
+    },
     {
       title: "Chat",
       path: "/admin/chat",
