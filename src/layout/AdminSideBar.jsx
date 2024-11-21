@@ -20,7 +20,7 @@ const AdminSideBar = () => {
       path: "/admin/dashboard",
       icon: dashboardIcon,
     },
-    ...(flexiUser?.role !== 'vendor' ? [{
+    ...(flexiUser?.role !== 'customer' ? [{
       title: "Invoice",
       path: "/admin/invoice",
       icon: invoiceIcon,

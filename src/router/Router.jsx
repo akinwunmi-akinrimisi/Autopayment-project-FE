@@ -19,6 +19,7 @@ import NewEscrow from "../pages/newEscrow/NewEscrow";
 import LoginForm from "../pages/auth/login";
 import Escrow from "../pages/adminEscrow/escrow";
 import ProtectedRoute from "./ProtectedRoute";
+import Profile from "../pages/profile/Profile";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -32,10 +33,8 @@ const router = createBrowserRouter(
 
       <Route path="/admin" element={<RootLayout />}>
         <Route path="dashboard" element={<Dashbaord />} />
-        <Route
-          path="invoice"
-          element={<Invoice />}
-        />
+        <Route path="invoice" element={<Invoice />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="chat" element={<Chat />} />
         <Route path="escrow" element={<Escrow />} />
         <Route path="new-escrow" element={<NewEscrow />} />
