@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useWriteContract, useReadContract, useAccount } from 'wagmi';
+import { useWriteContract, useReadContract } from 'wagmi';
 import { parseEther } from "ethers";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FlexiscrowContract } from "../../Constant/index";
+import axiosInstance from '../../utils/axios';
 
 const AdminDashboard = () => {
-  const { address: connectedAddress, isConnected } = useAccount();
   const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
   const [escrowDetails, setEscrowDetails] = useState({});
@@ -16,35 +16,8 @@ const AdminDashboard = () => {
     bps: '100',
   });
 
-  const [escrows, setEscrows] = useState([
-    {
-      invoiceId: '1',
-      seller: '0x6BF7d6b94282BD48ff458599aDafA268BcB009FF',
-      completionDuration: 7 * 24 * 60 * 60, // 7 days in seconds
-      releaseTimeout: 2 * 24 * 60 * 60, // 2 days in seconds
-      createdAt: '2024-03-15',
-      status: 'Pending',
-      isApproved: false,
-    },
-    {
-      invoiceId: "2",
-      seller: "0x890abcdef1234567890abcdef1234567890abcde",
-      completionDuration: 14 * 24 * 60 * 60, // 14 days in seconds
-      releaseTimeout: 3 * 24 * 60 * 60, // 3 days in seconds
-      createdAt: "2024-03-14",
-      status: 'Pending',
-      isApproved: false,
-    },
-    {
-      invoiceId: "3",
-      seller: "0x7890abcdef1234567890abcdef1234567890abcd",
-      completionDuration: 30 * 24 * 60 * 60, // 30 days in seconds
-      releaseTimeout: 5 * 24 * 60 * 60, // 5 days in seconds
-      createdAt: "2024-03-13",
-      status: 'Pending',
-      isApproved: false,
-    }
-  ]); 
+  const [escrows, setEscrows] = useState([]);
+  const [isLoadingEscrows, setIsLoadingEscrows] = useState(false);
 
   const { writeContract: updateFees, data: updateData, isSuccess, isLoading: updating, error: updateError } = useWriteContract({});
 
@@ -58,7 +31,12 @@ const AdminDashboard = () => {
     enabled: !!selectedInvoiceId,
   });
 
-  const isAdmin = isConnected && connectedAddress?.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
+  const connectedAddress = JSON.parse(localStorage.getItem('flexi_user') || 'null');
+  const isConnected = !!connectedAddress;
+
+  console.log("connectedAddress object:", connectedAddress);
+  console.log("address:", connectedAddress?.address);
+  console.log("role:", connectedAddress?.role);
 
   useEffect(() => {
     if (escrowData && selectedInvoiceId) {
@@ -75,9 +53,46 @@ const AdminDashboard = () => {
     }
   }, [escrowData, selectedInvoiceId]);
 
+  useEffect(() => {
+    const fetchEscrows = async () => {
+      if (!connectedAddress?.address) return;
+      
+      setIsLoadingEscrows(true);
+      try {
+        const response = await axiosInstance.get(`/invoice/get-invoices?address=${connectedAddress.address}&role=${connectedAddress.role}`);
+        const transformedEscrows = response.data.map(escrow => ({
+          invoiceId: escrow.id,
+          seller: escrow.seller.id,
+          completionDuration: calculateDuration(new Date(), new Date(escrow.dueDate)),
+          releaseTimeout: 2 * 24 * 60 * 60,
+          createdAt: new Date(escrow.createdAt).toLocaleDateString(),
+          status: escrow.status.charAt(0).toUpperCase() + escrow.status.slice(1),
+          isApproved: escrow.status !== 'pending',
+          price: escrow.price,
+          productName: escrow.productName,
+          description: escrow.description
+        }));
+
+        setEscrows(transformedEscrows);
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to fetch escrows');
+        console.error('Error fetching escrows:', error);
+      } finally {
+        setIsLoadingEscrows(false);
+      }
+    };
+
+    fetchEscrows();
+  }, []);
+
+  const calculateDuration = (startDate, endDate) => {
+    const diffTime = Math.abs(endDate - startDate);
+    return Math.ceil(diffTime / 1000);
+  };
+
   const handleViewDetails = async (invoiceId) => {
-    if (!isAdmin) {
-      toast.error('Only admin can view escrow details');
+    if (!isConnected) {
+      toast.error('Please connect your wallet');
       return;
     }
     setSelectedInvoiceId(invoiceId);
@@ -107,12 +122,12 @@ const AdminDashboard = () => {
   const handleUpdateFees = async (e) => {
     e.preventDefault();
 
-    if (!isConnected) {
+    if (!connectedAddress?.address) {
       toast.error('Please connect your wallet');
       return;
     }
 
-    if (!isAdmin) {
+    if (connectedAddress?.address.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
       toast.error('Unauthorized: Only admin can update fees');
       return;
     }
@@ -150,12 +165,12 @@ const AdminDashboard = () => {
   };
 
   const handleCreateEscrow = async (escrow) => {
-    if (!isConnected) {
+    if (!connectedAddress?.address) {
       toast.error('Please connect your wallet');
       return;
     }
 
-    if (!isAdmin) {
+    if (connectedAddress?.address.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
       toast.error('Unauthorized: Only admin can approve escrows');
       return;
     }
@@ -237,7 +252,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {isAdmin && (
+      {isConnected && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Update Fees</h2>
@@ -300,124 +315,128 @@ const AdminDashboard = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Escrows</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Invoice ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Seller
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Completion Duration
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Release Timeout
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {escrows.map((escrow) => (
-                <React.Fragment key={escrow.invoiceId}>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {escrow.invoiceId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                      {`${escrow.seller.slice(0, 6)}...${escrow.seller.slice(-4)}`}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDuration(escrow.completionDuration)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDuration(escrow.releaseTimeout)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {escrow.createdAt}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-sm rounded-full ${
-                        escrow.status === 'Active' 
-                          ? 'bg-green-100 text-green-800'
-                          : escrow.status === 'Failed'
-                          ? 'bg-red-100 text-red-800'
-                          : escrow.status === 'Pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {escrow.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {!escrow.isApproved && escrow.status !== 'Failed' ? (
-                        <button
-                          onClick={() => handleCreateEscrow(escrow)}
-                          disabled={creatingEscrow || !isAdmin}
-                          className={`px-4 py-2 text-sm font-medium rounded-md ${
-                            isAdmin
-                              ? 'bg-pink-500 text-white hover:bg-pink-600'
-                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          } ${creatingEscrow ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          {creatingEscrow ? 'Approving...' : 'Approve'}
-                        </button>
-                      ) : escrow.status === 'Active' && isAdmin && (
-                        <button
-                          onClick={() => handleViewDetails(escrow.invoiceId)}
-                          disabled={isReadLoading}
-                          className="px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
-                        >
-                          {isReadLoading && selectedInvoiceId === escrow.invoiceId ? 'Loading...' : 'View Details'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                  {escrowDetails[escrow.invoiceId] && (
-                    <tr className="bg-gray-50">
-                      <td colSpan="7" className="px-6 py-4">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div>
-                            <p className="text-sm font-medium text-gray-500">Escrow Address</p>
-                            <p className="text-sm font-mono text-gray-900">
-                              {`${escrowDetails[escrow.invoiceId].escrowAddress.slice(0, 6)}...${escrowDetails[escrow.invoiceId].escrowAddress.slice(-4)}`}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-500">Buyer</p>
-                            <p className="text-sm font-mono text-gray-900">
-                              {`${escrowDetails[escrow.invoiceId].buyer.slice(0, 6)}...${escrowDetails[escrow.invoiceId].buyer.slice(-4)}`}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-500">Seller</p>
-                            <p className="text-sm font-mono text-gray-900">
-                              {`${escrowDetails[escrow.invoiceId].seller.slice(0, 6)}...${escrowDetails[escrow.invoiceId].seller.slice(-4)}`}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-500">Created At</p>
-                            <p className="text-sm text-gray-900">
-                              {escrowDetails[escrow.invoiceId].createdAt}
-                            </p>
-                          </div>
-                        </div>
+          {isLoadingEscrows ? (
+            <div className="p-6 text-center">Loading escrows...</div>
+          ) : (
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Invoice ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Seller
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Release Timeout
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Product Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Price (ETH)
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {escrows.map((escrow) => (
+                  <React.Fragment key={escrow.invoiceId}>
+                    <tr className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {escrow.invoiceId}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                        {`${escrow.seller.slice(0, 6)}...${escrow.seller.slice(-4)}`}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDuration(escrow.releaseTimeout)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {escrow.productName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {escrow.price}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-sm rounded-full ${
+                          escrow.status === 'Active' 
+                            ? 'bg-green-100 text-green-800'
+                            : escrow.status === 'Failed'
+                            ? 'bg-red-100 text-red-800'
+                            : escrow.status === 'Pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {escrow.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {!escrow.isApproved && escrow.status !== 'Failed' ? (
+                          <button
+                            onClick={() => handleCreateEscrow(escrow)}
+                            disabled={creatingEscrow || !isConnected}
+                            className={`px-4 py-2 text-sm font-medium rounded-md ${
+                              isConnected
+                                ? 'bg-pink-500 text-white hover:bg-pink-600'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            } ${creatingEscrow ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {creatingEscrow ? 'Approving...' : 'Approve'}
+                          </button>
+                        ) : escrow.status === 'Active' && isConnected && (
+                          <button
+                            onClick={() => handleViewDetails(escrow.invoiceId)}
+                            disabled={isReadLoading}
+                            className="px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                          >
+                            {isReadLoading && selectedInvoiceId === escrow.invoiceId ? 'Loading...' : 'View Details'}
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+                    {escrowDetails[escrow.invoiceId] && (
+                      <tr className="bg-gray-50">
+                        <td colSpan="7" className="px-6 py-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-500">Escrow Address</p>
+                              <p className="text-sm font-mono text-gray-900">
+                                {`${escrowDetails[escrow.invoiceId].escrowAddress.slice(0, 6)}...${escrowDetails[escrow.invoiceId].escrowAddress.slice(-4)}`}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-500">Buyer</p>
+                              <p className="text-sm font-mono text-gray-900">
+                                {`${escrowDetails[escrow.invoiceId].buyer.slice(0, 6)}...${escrowDetails[escrow.invoiceId].buyer.slice(-4)}`}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-500">Seller</p>
+                              <p className="text-sm font-mono text-gray-900">
+                                {`${escrowDetails[escrow.invoiceId].seller.slice(0, 6)}...${escrowDetails[escrow.invoiceId].seller.slice(-4)}`}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-500">Created At</p>
+                              <p className="text-sm text-gray-900">
+                                {escrowDetails[escrow.invoiceId].createdAt}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

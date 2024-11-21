@@ -5,10 +5,14 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from 'wagmi';
 import { toast } from "react-toastify";
 import { useEffect } from 'react';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
+import axios from 'axios';
+import { disconnect } from "wagmi/actions";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
 
   useEffect(() => {
     if (!isConnected && localStorage.getItem('flexi_session')) {
@@ -17,6 +21,41 @@ const Header = () => {
       navigate('/');
     }
   }, [isConnected, navigate]);
+
+  useEffect(() => {
+    const handleAuthentication = async () => {
+      if (address && isConnected && !localStorage.getItem('flexi_session')) {
+        try {
+          const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/web3-login`, {
+            address: address,
+            // role: 'vendor'
+          });
+    
+          if (response.data.success) {
+            localStorage.setItem('flexi_session', JSON.stringify(response.data.data.session));
+            localStorage.setItem('flexi_user', JSON.stringify(response.data.data.user));
+            
+            if (response.data.data.user.isProfileUpdated === false) {
+              toast.info('Please complete your profile');
+              navigate('/admin/profile');
+            } else {
+              navigate('/admin/dashboard');
+            }
+          } else {
+            toast.error('Failed to authenticate wallet');
+          }
+        } catch (error) {
+          toast.error('Something went wrong. Please try connecting again.');
+          if (isConnected) {
+            disconnect();
+            throw new Error(error);
+          }
+        }
+      }
+    };
+
+    handleAuthentication();
+  }, [address, isConnected]);
 
   const handleDashboardClick = (e) => {
     e.preventDefault();
@@ -28,6 +67,10 @@ const Header = () => {
     }
     
     navigate('/admin/dashboard');
+  };
+
+  const handleConnect = () => {
+    openConnectModal();
   };
 
   return (
@@ -51,15 +94,24 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        {isConnected && !localStorage.getItem('flexi_session') && (
-          <button 
-            onClick={() => navigate('/login')}
-            className="h-[42px] bg-[#EA3982] w-fit px-4 rounded-[10px] text-[#FFFFFF] font-medium hover:scale-[102%] transition-all duration-100"
-          >
-            Sign up
-          </button>
-        )}
-        <ConnectButton />
+        <ConnectButton.Custom>
+          {({ account, chain, openConnectModal, mounted }) => {
+            return (
+              <div>
+                {(() => {
+                  if (!mounted || !account || !chain) {
+                    return (
+                      <button onClick={handleConnect} className="connect-button-styles">
+                        Connect Wallet
+                      </button>
+                    );
+                  }
+                  return <ConnectButton />;
+                })()}
+              </div>
+            );
+          }}
+        </ConnectButton.Custom>
       </div>
     </div>
   );

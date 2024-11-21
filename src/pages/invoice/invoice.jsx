@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 
 const InvoiceForm = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     productName: "",
     description: "",
@@ -15,6 +18,9 @@ const InvoiceForm = () => {
     dueDate: new Date(),
   });
 
+  const [serviceFee, setServiceFee] = useState(0);
+  const [total, setTotal] = useState(0);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -24,6 +30,13 @@ const InvoiceForm = () => {
       ...prev,
       [name]: value,
     }));
+
+    if (name === 'price') {
+      const basePrice = parseFloat(value) || 0;
+      const fee = basePrice * 0.015;
+      setServiceFee(fee);
+      setTotal(basePrice + fee);
+    }
   };
 
   const handleDateChange = (date) => {
@@ -51,13 +64,13 @@ const InvoiceForm = () => {
 
     const apiData = {
       ...formData,
-      price: Number(formData.price),
+      price: total,
       dueDate: formData.dueDate.toISOString().split("T")[0],
     };
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/invoice`,
+        `${import.meta.env.VITE_BASE_URL}/invoice/web3`,
         apiData,
         {
           headers: {
@@ -88,6 +101,8 @@ const InvoiceForm = () => {
         pauseOnHover: true,
         draggable: true,
       });
+
+      navigate('/admin/escrow');
     } catch (err) {
       if (err.response?.status === 401) {
         toast.error("Session expired. Please login again.");
@@ -148,6 +163,18 @@ const InvoiceForm = () => {
                 placeholder="Enter Price"
               />
             </div>
+
+            {formData.price && (
+              <div className="col-span-2">
+                <div className="text-sm text-gray-600">
+                  <p>Service Fee (1.5%): ₦{serviceFee.toFixed(2)}</p>
+                  <p className="font-semibold">Total Amount: ₦{total.toFixed(2)}</p>
+                  <p className="text-xs mt-1">
+                    A 1.5% service fee is added to cover transaction processing and platform maintenance.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Customer First Name - Replace Customer Name */}
             <div>
