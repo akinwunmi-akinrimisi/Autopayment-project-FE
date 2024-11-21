@@ -4,6 +4,7 @@ import { parseEther } from "ethers";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FlexiscrowContract } from "../../Constant/index";
+
 import axiosInstance from '../../utils/axios';
 
 const AdminDashboard = () => {
@@ -170,10 +171,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (connectedAddress?.address.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
-      toast.error('Unauthorized: Only admin can approve escrows');
-      return;
-    }
+    
 
     try {
        createEscrow({
