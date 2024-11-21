@@ -34,11 +34,7 @@ const router = createBrowserRouter(
         <Route path="dashboard" element={<Dashbaord />} />
         <Route
           path="invoice"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <Invoice />
-            </ProtectedRoute>
-          }
+          element={<Invoice />}
         />
         <Route path="chat" element={<Chat />} />
         <Route path="escrow" element={<Escrow />} />
