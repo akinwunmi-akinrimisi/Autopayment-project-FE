@@ -107,9 +107,9 @@ const NewEscrow = () => {
   return (
     <div className="min-h-screen flex flex-col p-8">
       <ToastContainer position="top-right" autoClose={5000} />
-      <p className="text-2xl font-bold mb-2">New Escrow</p>
+      <p className="text-2xl font-bold mb-2">Dispute</p>
       <p className="text-gray-600 mb-8">
-        Fill the forms below to create a new escrow for your customer.
+        Fill the form to dispute a transaction.
       </p>
 
       <form onSubmit={handleSubmit} className="max-w-4xl">
@@ -177,7 +177,7 @@ const NewEscrow = () => {
         <button
           type="submit"
           disabled={creating}
-          className={`w-full mt-8 bg-pink-500 text-white py-3 px-4 rounded-lg transition duration-200 font-medium
+          className={`w-1/4 mt-8 bg-pink-500 text-white py-3 px-4 rounded-lg transition duration-200 font-medium
             ${creating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-600'}`}
         >
           {creating ? 'Creating Escrow...' : 'Create Escrow'}

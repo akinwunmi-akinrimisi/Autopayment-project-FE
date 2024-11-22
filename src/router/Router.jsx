@@ -36,7 +36,7 @@ const router = createBrowserRouter(
         <Route path="profile" element={<Profile />} />
         <Route path="chat" element={<Chat />} />
         <Route path="escrow" element={<Escrow />} />
-        <Route path="new-escrow" element={<NewEscrow />} />
+        <Route path="dispute" element={<NewEscrow />} />
         {/* TO NAVIGATE TO THIS ROUTE JUST GO TO: /invoice/test  */}
       </Route>
     </Route>
