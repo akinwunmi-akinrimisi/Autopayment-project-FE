@@ -11,6 +11,7 @@ import Auth from "../pages/auth/authentication";
 import Dashbaord from "../pages/dashboard/Dashbaord";
 import Invoice from "../pages/invoice/invoice";
 import Chat from "../pages/chat/chat";
+import Dispute from "../pages/dispute/dispute";
 
 // PAGES
 import Home from "../pages/home/Home";
@@ -36,7 +37,8 @@ const router = createBrowserRouter(
         <Route path="profile" element={<Profile />} />
         <Route path="chat" element={<Chat />} />
         <Route path="escrow" element={<Escrow />} />
-        <Route path="dispute" element={<NewEscrow />} />
+        <Route path="new-escrow" element={<NewEscrow />} />
+        <Route path="dispute" element={<Dispute />} />
         {/* TO NAVIGATE TO THIS ROUTE JUST GO TO: /invoice/test  */}
       </Route>
     </Route>
