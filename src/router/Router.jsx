@@ -14,7 +14,7 @@ import Chat from "../pages/chat/chat";
 import Dispute from "../pages/dispute/dispute";
 
 // PAGES
-import Home from "../pages/home/Home";
+import HomePage from "../pages/home/HomePage";
 import NewEscrow from "../pages/newEscrow/NewEscrow";
 import LoginForm from "../pages/auth/login";
 import Escrow from "../pages/adminEscrow/escrow";
@@ -25,7 +25,8 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
       {/* SAMPLE ROUTE */}
-      <Route index element={<Home />} />
+      <Route index element={<HomePage />} />
+      <Route path="/home/:id" element={<HomePage />} />
       <Route path="/authentication" element={<Auth />}></Route>
       <Route path="/login" element={<LoginForm />}></Route>
 
