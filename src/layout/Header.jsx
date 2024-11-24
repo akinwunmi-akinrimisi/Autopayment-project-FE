@@ -80,7 +80,7 @@ const Header = () => {
       <div>
         <ul className="flex items-center gap-10">
           <li className="text-[#FFE2E0] text-[24px] font-medium">
-            <NavLink>Home</NavLink>
+            <NavLink className="decoration-[none] no-underline text-[white]">Home</NavLink>
           </li>
 
           <li className="text-[#FFE2E0] text-[24px] font-medium">

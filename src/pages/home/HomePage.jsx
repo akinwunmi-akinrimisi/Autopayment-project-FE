@@ -4,8 +4,12 @@ import HowItWorks from "../../components/home/HowItWorks";
 import LearnAboutUs from "../../components/home/LearnAboutUs";
 import WhatWeOffer from "../../components/home/WhatWeOffer";
 import Footer from "../../layout/Footer";
+import { useParams } from "react-router-dom";
 
 const HomePage = () => {
+  const {id} = useParams();
+
+  console.log("invoice id:",id);
   return (
     <div className="home-page">
       <Header />
