@@ -12,7 +12,7 @@ const HomePage = () => {
   console.log("invoice id:",id);
   return (
     <div className="home-page">
-      <Header />
+      <Header invoiceId={id}/>
 
       <div className="w-full flex px-[81px] mt-[100px] min-h-[600px] ">
         <div className="flex-1 flex flex-col justify-center">
