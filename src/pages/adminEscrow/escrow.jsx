@@ -514,9 +514,19 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
-                      
+                      <button
+                            // onClick={() => handleFundEscrow(escrow)}
+                            disabled={!isConnected || escrow.status !== 'Accepted'}
+                            className={`px-4 py-2 text-sm font-medium rounded-md ${
+                              isConnected && escrow?.status === 'funded'
+                                ? 'bg-green-500 text-white hover:bg-green-600'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            Mark as complete
+                          </button>
                         {connectedAddress?.role === 'customer' ? (
+                          
                           <button
                             onClick={() => handleFundEscrow(escrow)}
                             disabled={!isConnected || escrow.status !== 'Accepted'}
@@ -528,6 +538,7 @@ const AdminDashboard = () => {
                           >
                             Fund
                           </button>
+                          
                         ) : (
                           !escrow?.isApproved && escrow?.status !== "Failed" ? (
                             <button
@@ -556,6 +567,7 @@ const AdminDashboard = () => {
                                   ? "Loading..."
                                   : "View Details"}
                               </button>
+                              
                             )
                           )
                         )}
