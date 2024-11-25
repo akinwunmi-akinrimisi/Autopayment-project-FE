@@ -4,7 +4,6 @@ import { parseEther } from "ethers";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FlexiscrowContract } from "../../Constant/index";
-
 import axiosInstance from "../../utils/axios";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -14,6 +13,8 @@ import FundModal from "../../components/modals/FundModal";
 const AdminDashboard = () => {
   const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [amount, setAmount] = useState("");
+  const [fee, setFee] = useState("");
   const [escrowDetails, setEscrowDetails] = useState({
     invoiceId: "",
     seller: "",
@@ -44,6 +45,8 @@ const AdminDashboard = () => {
 
   const { writeContract: createEscrow, isLoading: creatingEscrow } =
     useWriteContract();
+
+    
 
   const {
     data: escrowData,
@@ -210,6 +213,8 @@ const AdminDashboard = () => {
     }
   };
 
+  
+
   const handleApprovalClick = (escrow) => {
     setSelectedEscrow(escrow);
     setShowApprovalModal(true);
@@ -231,7 +236,7 @@ const AdminDashboard = () => {
       );
       const releaseTimeoutBigInt = BigInt(selectedEscrow.releaseTimeout);
 
-      await createEscrow({
+       createEscrow({
         address: FlexiscrowContract.address,
         abi: FlexiscrowContract.abi,
         functionName: "createEscrow",
@@ -288,24 +293,15 @@ const AdminDashboard = () => {
     return `${days} days`;
   };
 
-  const handleFundEscrow = (escrow) => {
-    setSelectedFundEscrow(escrow);
+  const handleFundEscrow = (fundEscrow) => {
+    setSelectedFundEscrow(fundEscrow);
     setShowFundModal(true);
   };
 
   const handleFundConfirm = async () => {
     if (!selectedFundEscrow) return;
     
-    try {
-      // Add your funding logic here
-      // This might involve calling a smart contract function
-      
-      toast.success("Escrow funded successfully!");
-      setShowFundModal(false);
-      await fetchEscrows(); // Refresh the escrow list
-    } catch (error) {
-      toast.error("Failed to fund escrow: " + error.message);
-    }
+    
   };
 
   return (
@@ -488,6 +484,17 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                            onClick={() => handleFundEscrow(escrow)}
+                            disabled={!isConnected || escrow.status !== 'Accepted'}
+                            className={`px-4 py-2 text-sm font-medium rounded-md ${
+                              isConnected && escrow.status === 'Accepted'
+                                ? 'bg-green-500 text-white hover:bg-green-600'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            Fund
+                          </button>
                         {connectedAddress?.role === 'customer' ? (
                           <button
                             onClick={() => handleFundEscrow(escrow)}
