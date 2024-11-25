@@ -103,7 +103,6 @@ function DisputeForm() {
         resolutionDetails: "Awaiting response from billing department.",
       });
       toast.success("Dispute submitted successfully!");
-      setResponseMessage("Dispute submitted successfully!");
       setFormData({
         invoiceId: "",
         title: "",
