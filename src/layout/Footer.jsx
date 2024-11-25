@@ -16,27 +16,27 @@ const Footer = () => {
           <h3 className="font-bold mb-3">PRODUCT</h3>
           <ul className="space-y-2 text-[#FFD8E4]">
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Pricing
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Overview
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Browse
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Accessibility
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Five
               </a>
             </li>
@@ -47,17 +47,17 @@ const Footer = () => {
           <h3 className="font-bold mb-3">RESOURCES</h3>
           <ul className="space-y-2 text-[#FFD8E4]">
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Help Center
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Blog
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Tutorials
               </a>
             </li>
@@ -68,22 +68,22 @@ const Footer = () => {
           <h3 className="font-bold mb-3">COMPANY</h3>
           <ul className="space-y-2 text-[#FFD8E4]">
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 About
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Press
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Events
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="#" className="link hover:underline">
                 Careers
               </a>
             </li>
