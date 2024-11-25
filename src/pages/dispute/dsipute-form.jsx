@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Input from "../../components/ui/input/input";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function DisputeForm() {
     const location = useLocation(); // Get the location object
@@ -101,7 +102,7 @@ function DisputeForm() {
         attachmentUrls: [fileUrl],
         resolutionDetails: "Awaiting response from billing department.",
       });
-
+      toast.success("Dispute submitted successfully!");
       setResponseMessage("Dispute submitted successfully!");
       setFormData({
         invoiceId: "",
@@ -114,6 +115,7 @@ function DisputeForm() {
       setResponseMessage(
         `Error: ${error.response?.data?.message || error.message}`
       );
+      toast.error(`Error: ${error.response?.data?.message || error.message}`)
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +135,7 @@ function DisputeForm() {
           value={formData.invoiceId}
           onChange={handleChange}
           error={errors.invoiceId}
-          readOnly
+        //   readOnly={!!invoiceId}
         />
         <Input
           id="title"
@@ -173,7 +175,7 @@ function DisputeForm() {
           {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>
-      {responseMessage && (
+      {/* {responseMessage && (
         <p
           className={`mt-4 text-center ${
             responseMessage.startsWith("Error")
@@ -183,7 +185,7 @@ function DisputeForm() {
         >
           {responseMessage}
         </p>
-      )}
+      )} */}
     </div>
   );
 }
