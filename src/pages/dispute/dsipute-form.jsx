@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import Input from "../../components/ui/input/input";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 function DisputeForm() {
+    const location = useLocation(); // Get the location object
+    const { invoiceId } = location.state || {}; // Access the invoice ID from state
+  console.log(invoiceId)
   const [formData, setFormData] = useState({
-    invoiceId: "",
+    invoiceId: invoiceId || "",
     title: "",
     description: "",
     attachmentUrls: [],
@@ -129,6 +133,7 @@ function DisputeForm() {
           value={formData.invoiceId}
           onChange={handleChange}
           error={errors.invoiceId}
+          readOnly
         />
         <Input
           id="title"

@@ -9,6 +9,7 @@ import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ApprovalModal from "../../components/modals/ApprovalModal";
 import FundModal from "../../components/modals/FundModal";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
@@ -24,6 +25,7 @@ const AdminDashboard = () => {
     completionDuration: "",
     releaseTimeout: "",
   });
+  const navigate = useNavigate()
 
   const _sellerAddress = localStorage.getItem("flexi_user");
   const sellerAddress = JSON.parse(_sellerAddress);
@@ -515,7 +517,14 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
-                      
+                        <button
+                        onClick={() => 
+                          navigate("/admin/dispute", { state: { invoiceId: escrow.invoiceId } }) // Pass invoice ID as state
+                        }
+                        className="ml-2 px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                      >
+                        Submit Dispute
+                      </button>
                         {connectedAddress?.role === 'customer' ? (
                           <button
                             onClick={() => handleFundEscrow(escrow)}
