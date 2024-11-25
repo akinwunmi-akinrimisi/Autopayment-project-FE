@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useWriteContract, useReadContract } from "wagmi";
+import { useWriteContract, useReadContract, useWatchContractEvent } from "wagmi";
 import { parseEther } from "ethers";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,6 +15,9 @@ const AdminDashboard = () => {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
   const [amount, setAmount] = useState("");
   const [fee, setFee] = useState("");
+  const [totalEscrows, setTotalEscrows] = React.useState(0);
+  const [activeEscrows, setActiveEscrows] = React.useState(0);
+  const [tvl, setTvl] = React.useState(0);
   const [escrowDetails, setEscrowDetails] = useState({
     invoiceId: "",
     seller: "",
@@ -35,6 +38,30 @@ const AdminDashboard = () => {
   const [escrows, setEscrows] = useState([]);
   console.log("escrows", escrows);
   const [isLoadingEscrows, setIsLoadingEscrows] = useState(false);
+
+
+  const { data: totalEscrowsData, refetch: refetchTotal } = useReadContract({
+    address: FlexiscrowContract.address,
+    abi: FlexiscrowContract.abi,
+    functionName: 'getTotalEscrows',
+    watch: true, 
+  });
+
+  useWatchContractEvent({
+    address: FlexiscrowContract.address,
+    abi: FlexiscrowContract.abi,
+    eventName: 'EscrowCreated', 
+    onLogs() {
+      // Refetch total escrows when new escrow is created
+      refetchTotal();
+    },
+  });
+
+  React.useEffect(() => {
+    if (totalEscrowsData) {
+      setTotalEscrows(Number(totalEscrowsData));
+    }
+  }, [totalEscrowsData]);
 
   const {
     writeContract: updateFees,
@@ -324,19 +351,19 @@ const AdminDashboard = () => {
           <h2 className="text-sm font-semibold text-gray-600 mb-2">
             Total Escrows
           </h2>
-          <p className="text-3xl font-bold text-gray-900">15</p>
+          <p className="text-3xl font-bold text-gray-900">{totalEscrows}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-600 mb-2">
             Active Escrows
           </h2>
-          <p className="text-3xl font-bold text-gray-900">8</p>
+          <p className="text-3xl font-bold text-gray-900">{activeEscrows}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-600 mb-2">
             Total Value Locked
           </h2>
-          <p className="text-3xl font-bold text-gray-900">25.5 ETH</p>
+          <p className="text-3xl font-bold text-gray-900">{tvl.toFixed(1)} LSK</p>
         </div>
       </div>
 
@@ -349,7 +376,7 @@ const AdminDashboard = () => {
             <form onSubmit={handleUpdateFees} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Flat Fee (ETH)
+                  Flat Fee (LSK)
                 </label>
                 <input
                   type="number"
@@ -395,7 +422,7 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-700">Flat Fee:</span>
-                <span className="text-gray-900">0.01 ETH</span>
+                <span className="text-gray-900">0.01 LSK</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-700">
@@ -438,7 +465,7 @@ const AdminDashboard = () => {
                     Product Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price (ETH)
+                    Completion duration
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -487,17 +514,8 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                            onClick={() => handleFundEscrow(escrow)}
-                            disabled={!isConnected || escrow.status !== 'Accepted'}
-                            className={`px-4 py-2 text-sm font-medium rounded-md ${
-                              isConnected && escrow.status === 'Accepted'
-                                ? 'bg-green-500 text-white hover:bg-green-600'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            Fund
-                          </button>
+                        <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
+                      
                         {connectedAddress?.role === 'customer' ? (
                           <button
                             onClick={() => handleFundEscrow(escrow)}
