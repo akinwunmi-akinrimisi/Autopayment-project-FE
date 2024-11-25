@@ -1,23 +1,27 @@
 import React, { useState } from "react";
 import Input from "../../components/ui/input/input";
+import axios from "axios";
 
 function DisputeForm() {
   const [formData, setFormData] = useState({
     invoiceId: "",
     title: "",
     description: "",
-    image: [],
+    attachmentUrls: [],
   });
 
+  const [file, setFile] = useState(null); // To store the file for upload
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleFileChange = (files) => {
-    setFormData((prevData) => ({ ...prevData, image: files[0] }));
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
   const validateForm = () => {
@@ -32,29 +36,87 @@ function DisputeForm() {
     if (!formData.description.trim()) {
       newErrors.description = "Description is required.";
     }
-    if (!formData.image) {
-      newErrors.image = "A document or image must be uploaded.";
+    if (!file) {
+      newErrors.file = "A document or image must be uploaded.";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const uploadFile = async () => {
+    if (!file) return null;
+
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+    uploadData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_PRESET); // Your Cloudinary preset
+    uploadData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+
+    try {
+      const response = await axios.post(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        uploadData
+      );
+
+      return response.data.secure_url; // Cloudinary URL
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      console.log("Submitting form data:", formData);
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setResponseMessage("");
+
+    try {
+      const fileUrl = await uploadFile();
+
+      if (!fileUrl) {
+        setErrors({ file: "Failed to upload file. Please try again." });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Submit dispute form with the uploaded file URL
+      await axios.post(`${import.meta.env.VITE_BASE_URL}/disputes`, {
+        invoiceId: formData.invoiceId,
+        status: "open", // Assuming 'open' is the default status
+        title: formData.title,
+        description: formData.description,
+        attachmentUrls: [fileUrl],
+        resolutionDetails: "Awaiting response from billing department.",
+      });
+
+      setResponseMessage("Dispute submitted successfully!");
+      setFormData({
+        invoiceId: "",
+        title: "",
+        description: "",
+        attachmentUrls: [],
+      });
+      setFile(null);
+    } catch (error) {
+      setResponseMessage(
+        `Error: ${error.response?.data?.message || error.message}`
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-lg p-6 ">
+    <div className="max-w-lg p-6">
       <h1 className="text-2xl font-semibold text-gray-700 mb-4">
         Submit a Dispute
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Invoice ID */}
         <Input
           id="invoiceId"
           name="invoiceId"
@@ -64,8 +126,6 @@ function DisputeForm() {
           onChange={handleChange}
           error={errors.invoiceId}
         />
-
-        {/* Title */}
         <Input
           id="title"
           name="title"
@@ -75,8 +135,6 @@ function DisputeForm() {
           onChange={handleChange}
           error={errors.title}
         />
-
-        {/* Description */}
         <Input
           id="description"
           name="description"
@@ -90,23 +148,33 @@ function DisputeForm() {
 
         {/* File Upload */}
         <Input
-          id="image"
-          name="image"
+          id="file"
+          name="file"
           type="file"
           label="Upload Document/Image"
-          onChange={(e) => handleFileChange(e.target.files)}
-          error={errors.image}
+          onChange={handleFileChange}
+          error={errors.file}
         />
-       
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-btn_bg text-white py-2 px-4 rounded-lg hover:bg-pink-600 transition"
+          disabled={isSubmitting}
         >
-          Submit
+          {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>
+      {responseMessage && (
+        <p
+          className={`mt-4 text-center ${
+            responseMessage.startsWith("Error")
+              ? "text-red-500"
+              : "text-green-500"
+          }`}
+        >
+          {responseMessage}
+        </p>
+      )}
     </div>
   );
 }

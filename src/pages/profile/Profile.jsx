@@ -4,6 +4,7 @@ import axios from "axios";
 
 // assets
 import add_photo from "../../assets/profile/add_photo.svg";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -52,6 +53,7 @@ const Profile = () => {
 
       if (response.data) {
         // Handle success - maybe show a toast notification
+        toast.success('Profile updated successfully')
         console.log('Profile updated successfully');
       }
     } catch (err) {
