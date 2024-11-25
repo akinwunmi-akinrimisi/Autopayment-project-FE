@@ -336,7 +336,7 @@ const AdminDashboard = () => {
           <h2 className="text-sm font-semibold text-gray-600 mb-2">
             Total Value Locked
           </h2>
-          <p className="text-3xl font-bold text-gray-900">25.5 ETH</p>
+          <p className="text-3xl font-bold text-gray-900">25.5 LSK</p>
         </div>
       </div>
 
@@ -349,7 +349,7 @@ const AdminDashboard = () => {
             <form onSubmit={handleUpdateFees} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Flat Fee (ETH)
+                  Flat Fee (LSK)
                 </label>
                 <input
                   type="number"
@@ -395,7 +395,7 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-700">Flat Fee:</span>
-                <span className="text-gray-900">0.01 ETH</span>
+                <span className="text-gray-900">0.01 LSK</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-700">
@@ -438,7 +438,7 @@ const AdminDashboard = () => {
                     Product Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price (ETH)
+                    Completion duration
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
