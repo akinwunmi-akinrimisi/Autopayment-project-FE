@@ -137,7 +137,7 @@ const InvoiceForm = () => {
             {/* Product Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Name
+                Completion duration
               </label>
               <input
                 type="text"
@@ -152,7 +152,7 @@ const InvoiceForm = () => {
             {/* Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (₦)
+                Price (Lsk)
               </label>
               <input
                 type="number"
@@ -167,8 +167,8 @@ const InvoiceForm = () => {
             {formData.price && (
               <div className="col-span-2">
                 <div className="text-sm text-gray-600">
-                  <p>Service Fee (1.5%): ₦{serviceFee.toFixed(2)}</p>
-                  <p className="font-semibold">Total Amount: ₦{total.toFixed(2)}</p>
+                  <p>Service Fee (1.5%): lsk{serviceFee.toFixed(2)}</p>
+                  <p className="font-semibold">Total Amount: lsk{total.toFixed(2)}</p>
                   <p className="text-xs mt-1">
                     A 1.5% service fee is added to cover transaction processing and platform maintenance.
                   </p>

@@ -11,13 +11,13 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 
   const handleFundEscrow = async () => {
     try {
-      // Calculate 2.5% of the selected price
+     
       const priceInEther = parseFloat(selectedEscrow.price); 
-      const feeInEther = priceInEther * (0.025); 
-      const amountAfterFee = priceInEther - feeInEther; 
+      const feeInEther = (priceInEther * (0.025)) + 3; 
+      const amountAfterFee = priceInEther + feeInEther; 
      
       // Convert values to Wei
-      const amount = ethers.parseEther(amountAfterFee.toString());
+      const amount = ethers.parseEther(priceInEther.toString());
       const fee = ethers.parseEther(feeInEther.toString());
 
       console.log("amount in wei:", amount);
