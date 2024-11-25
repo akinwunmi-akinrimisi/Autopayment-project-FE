@@ -514,17 +514,8 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                            onClick={() => handleFundEscrow(escrow)}
-                            disabled={!isConnected || escrow.status !== 'Accepted'}
-                            className={`px-4 py-2 text-sm font-medium rounded-md ${
-                              isConnected && escrow.status === 'Accepted'
-                                ? 'bg-green-500 text-white hover:bg-green-600'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            Fund
-                          </button>
+                        <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
+                      
                         {connectedAddress?.role === 'customer' ? (
                           <button
                             onClick={() => handleFundEscrow(escrow)}

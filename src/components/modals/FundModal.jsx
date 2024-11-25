@@ -72,11 +72,14 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 	};
 
 	const handleApproveOrFund = async () => {
-		if (Number(allowanceData) < Number(parseEther(selectedEscrow.price))) {
+    console.log("selected", selectedEscrow.price);
+		if (Number(allowanceData) < Number(parseEther(selectedEscrow.price.toString()))) {
 			await handleApprove();
 		} else {
 			await handleFundEscrow();
 		}
+    
+    
 	};
 
 	return (
@@ -103,7 +106,7 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 				<Button
 					variant="success"
 					onClick={handleApproveOrFund}
-					// onClick={handleFundEscrow}
+					
 					className="bg-green-500"
 					disabled={fundingEscrow}
 				>
