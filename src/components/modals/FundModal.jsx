@@ -29,7 +29,7 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 		const feeInEther = priceInEther * 0.025 + 3;
 		const amountAfterFee = priceInEther + feeInEther;
 		try {
-			await approveUSDCRaw({
+			 approveUSDCRaw({
 				address: LiskTokenContract.address,
 				abi: LiskTokenContract.abi,
 				functionName: "approve",
@@ -50,6 +50,8 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 			// Convert values to Wei
 			const amount = ethers.parseEther(priceInEther.toString());
 			const fee = ethers.parseEther(feeInEther.toString());
+
+      console.log("ethers", parseEther(selectedEscrow?.price?.toString()));
 
 			console.log("amount in wei:", amount);
 			console.log("amount in wei:", fee);
