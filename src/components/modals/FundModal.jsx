@@ -107,7 +107,7 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 				>
 					{/* {fundingEscrow ? "Processing..." : "Approve Fund"} */}
 					{Number(allowanceData) <
-					Number(parseEther(selectedEscrow?.price?.toString()))
+					Number(parseEther(selectedEscrow?.price?.toString() || "0"))
 						? "Approve Contract"
 						: fundingEscrow
 						? "Processing..."
