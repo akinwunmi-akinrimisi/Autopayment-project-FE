@@ -79,16 +79,16 @@ const Header = () => {
 
       <div>
         <ul className="flex items-center gap-10">
-          <li className="text-[#FFE2E0] text-[24px] font-medium">
-            <NavLink>Home</NavLink>
+          <li className="text-[#FFE2E0] text-[24px] font-medium no-underline">
+            <NavLink className="link">Home</NavLink>
           </li>
 
-          <li className="text-[#FFE2E0] text-[24px] font-medium">
-            <NavLink>About Us</NavLink>
+          <li className="text-[#FFE2E0] text-[24px] font-medium no-underline">
+            <NavLink className="link">About Us</NavLink>
           </li>
 
           <li className="text-[#FFFFFF] text-[24px] font-medium">
-            <NavLink onClick={handleDashboardClick}>Dashboard</NavLink>
+            <NavLink className="link" onClick={handleDashboardClick}>Dashboard</NavLink>
           </li>
         </ul>
       </div>
@@ -101,7 +101,7 @@ const Header = () => {
                 {(() => {
                   if (!mounted || !account || !chain) {
                     return (
-                      <button onClick={handleConnect} className="connect-button-styles">
+                      <button onClick={handleConnect} className="connect-button-styles bg-btn_bg text-white px-3 py-2 rounded-[10px]">
                         Connect Wallet
                       </button>
                     );

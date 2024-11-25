@@ -15,6 +15,7 @@ p {
   background: #EFF7FF;
 
 }
-[data-rk] .ju367v9i {
-  background: #EA3982 !important; /* Your custom color */
+.link {
+  text-decoration: none;
+  color:#FFE2E0;
 }
