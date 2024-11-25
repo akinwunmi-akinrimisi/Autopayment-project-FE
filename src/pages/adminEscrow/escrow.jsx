@@ -33,6 +33,7 @@ const AdminDashboard = () => {
   });
 
   const [escrows, setEscrows] = useState([]);
+  console.log("escrows", escrows);
   const [isLoadingEscrows, setIsLoadingEscrows] = useState(false);
 
   const {
@@ -102,19 +103,20 @@ const AdminDashboard = () => {
         `/invoice/get-invoices?address=${connectedAddress.address}&role=${connectedAddress.role}`
       );
       const transformedEscrows = response.data.map((escrow) => ({
-        invoiceId: escrow.id,
-        seller: escrow.seller.id,
+        invoiceId: escrow?.id,
+        seller: escrow?.seller?.id,
+        buyer: escrow?.buyer?.id,
         completionDuration: calculateDuration(
           new Date(),
           new Date(escrow.dueDate)
         ),
         releaseTimeout: 2 * 24 * 60 * 60,
         createdAt: new Date(escrow.createdAt).toLocaleDateString(),
-        status: escrow.status.charAt(0).toUpperCase() + escrow.status.slice(1),
-        isApproved: escrow.status !== "pending",
-        price: escrow.price,
-        productName: escrow.productName,
-        description: escrow.description,
+        status: escrow?.status?.charAt(0).toUpperCase() + escrow?.status?.slice(1),
+        isApproved: escrow?.status !== "pending",
+        price: escrow?.price,
+        productName: escrow?.productName,
+        description: escrow?.description,
       }));
 
       setEscrows(transformedEscrows);
@@ -427,7 +429,7 @@ const AdminDashboard = () => {
                     Invoice ID
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Seller
+                    {connectedAddress?.role === 'customer' ? 'Buyer' : 'Seller'}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Release Timeout
@@ -451,36 +453,37 @@ const AdminDashboard = () => {
                   <React.Fragment key={escrow.invoiceId}>
                     <tr className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {escrow.invoiceId}
+                        {escrow?.invoiceId}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                        {`${escrow.seller.slice(0, 6)}...${escrow.seller.slice(
-                          -4
-                        )}`}
+                        {`${connectedAddress?.role === 'customer' ? 
+                          escrow?.buyer?.slice(0, 6) : escrow?.seller?.slice(0, 6)}...${
+                          connectedAddress?.role === 'customer' ? 
+                          escrow?.buyer?.slice(-4) : escrow?.seller?.slice(-4)}`}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDuration(escrow.completionDuration)}
+                        {formatDuration(escrow?.completionDuration)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDuration(escrow.releaseTimeout)}
+                        {formatDuration(escrow?.releaseTimeout)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {escrow.createdAt}
+                        {escrow?.createdAt}
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 py-1 text-sm rounded-full ${
-                            escrow.status === "Active"
+                            escrow?.status === "Active"
                               ? "bg-green-100 text-green-800"
-                              : escrow.status === "Failed"
+                              : escrow?.status === "Failed"
                               ? "bg-red-100 text-red-800"
-                              : escrow.status === "Pending"
+                              : escrow?.status === "Pending"
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {escrow.status}
+                          {escrow?.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -500,7 +503,7 @@ const AdminDashboard = () => {
                             onClick={() => handleFundEscrow(escrow)}
                             disabled={!isConnected || escrow.status !== 'Accepted'}
                             className={`px-4 py-2 text-sm font-medium rounded-md ${
-                              isConnected && escrow.status === 'Accepted'
+                              isConnected && escrow?.status === 'Accepted'
                                 ? 'bg-green-500 text-white hover:bg-green-600'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}
@@ -508,7 +511,7 @@ const AdminDashboard = () => {
                             Fund
                           </button>
                         ) : (
-                          !escrow.isApproved && escrow.status !== "Failed" ? (
+                          !escrow?.isApproved && escrow?.status !== "Failed" ? (
                             <button
                               onClick={() => handleApprovalClick(escrow)}
                               disabled={!isConnected}
@@ -521,7 +524,7 @@ const AdminDashboard = () => {
                               Approve
                             </button>
                           ) : (
-                            escrow.status === "Accepted" &&
+                            escrow?.status === "Accepted" &&
                             isConnected && (
                               <button
                                 onClick={() =>
@@ -531,7 +534,7 @@ const AdminDashboard = () => {
                                 className="px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
                               >
                                 {isReadLoading &&
-                                selectedInvoiceId === escrow.invoiceId
+                                selectedInvoiceId === escrow?.invoiceId
                                   ? "Loading..."
                                   : "View Details"}
                               </button>
@@ -551,9 +554,9 @@ const AdminDashboard = () => {
                               <p className="text-sm font-mono text-gray-900">
                                 {`${escrowDetails[
                                   selectedEscrow?.invoiceId
-                                ]?.escrowAddress.slice(0, 6)}...${escrowDetails[
+                                ]?.escrowAddress?.slice(0, 6)}...${escrowDetails[
                                   escrow?.invoiceId
-                                ]?.escrowAddress.slice(-4)}`}
+                                ]?.escrowAddress?.slice(-4)}`}
                               </p>
                             </div>
                             <div>
@@ -563,9 +566,9 @@ const AdminDashboard = () => {
                               <p className="text-sm font-mono text-gray-900">
                                 {`${escrowDetails[
                                   selectedEscrow?.invoiceId
-                                ]?.buyer.slice(0, 6)}...${escrowDetails[
+                                ]?.buyer?.slice(0, 6)}...${escrowDetails[
                                   escrow?.invoiceId
-                                ]?.buyer.slice(-4)}`}
+                                ]?.buyer?.slice(-4)}`}
                               </p>
                             </div>
                             <div>
@@ -575,9 +578,9 @@ const AdminDashboard = () => {
                               <p className="text-sm font-mono text-gray-900">
                                 {`${escrowDetails[
                                   selectedEscrow?.invoiceId
-                                ]?.seller.slice(0, 6)}...${escrowDetails[
+                                ]?.seller?.slice(0, 6)}...${escrowDetails[
                                   escrow?.invoiceId
-                                ]?.seller.slice(-4)}`}
+                                ]?.seller?.slice(-4)}`}
                               </p>
                             </div>
                             <div>

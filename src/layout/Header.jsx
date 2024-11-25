@@ -4,15 +4,18 @@ import logo from "../assets/logo.svg";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from 'wagmi';
 import { toast } from "react-toastify";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import axios from 'axios';
 import { disconnect } from "wagmi/actions";
 
-const Header = () => {
+const Header = ({invoiceId}) => {
   const navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
+  
+  // Add state for email
+  const [invoiceEmail, setInvoiceEmail] = useState(null);
 
   useEffect(() => {
     if (!isConnected && localStorage.getItem('flexi_session')) {
@@ -26,10 +29,16 @@ const Header = () => {
     const handleAuthentication = async () => {
       if (address && isConnected && !localStorage.getItem('flexi_session')) {
         try {
-          const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/web3-login`, {
+          const payload = {
             address: address,
-            // role: 'vendor'
-          });
+          };
+          
+          // Add email to payload if it exists
+          if (invoiceEmail) {
+            payload.email = invoiceEmail;
+          }
+
+          const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/web3-login`, payload);
     
           if (response.data.success) {
             localStorage.setItem('flexi_session', JSON.stringify(response.data.data.session));
@@ -55,7 +64,7 @@ const Header = () => {
     };
 
     handleAuthentication();
-  }, [address, isConnected]);
+  }, [address, isConnected, invoiceEmail]);
 
   const handleDashboardClick = (e) => {
     e.preventDefault();
@@ -69,8 +78,19 @@ const Header = () => {
     navigate('/admin/dashboard');
   };
 
-  const handleConnect = () => {
-    openConnectModal();
+  const handleConnect = async () => {
+    if (invoiceId) {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/invoice/customer-email/${invoiceId}`);
+        setInvoiceEmail(response.data.email);
+        openConnectModal();
+      } catch (error) {
+        toast.error('Failed to retrieve invoice information');
+        return;
+      }
+    } else {
+      openConnectModal();
+    }
   };
 
   return (
@@ -80,7 +100,7 @@ const Header = () => {
       <div>
         <ul className="flex items-center gap-10">
           <li className="text-[#FFE2E0] text-[24px] font-medium">
-            <NavLink>Home</NavLink>
+            <NavLink className="decoration-[none] no-underline text-[white]">Home</NavLink>
           </li>
 
           <li className="text-[#FFE2E0] text-[24px] font-medium">
