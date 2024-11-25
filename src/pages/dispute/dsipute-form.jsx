@@ -20,8 +20,12 @@ function DisputeForm() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const handleFileChange = (file) => {
+    if (file) {
+      setFile(file); // Set the file state to the selected file
+    } else {
+      setFile(null); // Reset file state if no file is selected
+    }
   };
 
   const validateForm = () => {
@@ -37,11 +41,11 @@ function DisputeForm() {
       newErrors.description = "Description is required.";
     }
     if (!file) {
-      newErrors.file = "A document or image must be uploaded.";
+      newErrors.file = "A document or image must be uploaded."; // Ensure this error is set if no file is selected
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0; // Return true if no errors
   };
 
   const uploadFile = async () => {
