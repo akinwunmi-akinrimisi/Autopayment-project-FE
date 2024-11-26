@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useWriteContract, useReadContract, useWatchContractEvent } from "wagmi";
+import { useWriteContract, useReadContract, useAccount, useWaitForTransactionReceipt, useWatchContractEvent } from "wagmi";
 import { parseEther } from "ethers";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FlexiscrowContract } from "../../Constant/index";
+import { FlexiscrowContract, EscrowContract } from "../../Constant/index";
 import axiosInstance from "../../utils/axios";
-import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { 
+  Button, 
+  Modal, 
+  Alert,
+  Spinner
+} from 'react-bootstrap';
 import ApprovalModal from "../../components/modals/ApprovalModal";
 import FundModal from "../../components/modals/FundModal";
+
+
 
 const AdminDashboard = () => {
   const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
@@ -18,6 +25,15 @@ const AdminDashboard = () => {
   const [totalEscrows, setTotalEscrows] = React.useState(0);
   const [activeEscrows, setActiveEscrows] = React.useState(0);
   const [tvl, setTvl] = React.useState(0);
+  const { address } = useAccount();
+  const [currentStatus, setCurrentStatus] = useState(null);
+  
+  const [showModal, setShowModal] = useState(false);
+  const [alertState, setAlertState] = useState({
+    show: false,
+    variant: 'success',
+    message: ''
+  });
   const [escrowDetails, setEscrowDetails] = useState({
     invoiceId: "",
     seller: "",
@@ -39,7 +55,210 @@ const AdminDashboard = () => {
   console.log("escrows", escrows);
   const [isLoadingEscrows, setIsLoadingEscrows] = useState(false);
 
+  
 
+    const { 
+      write: releaseFunds, 
+      data: txData, 
+      error: writeTxError, 
+      isError: isWriteError,
+      isLoading: isWriteLoading 
+    } = useWriteContract({
+      address: EscrowContract.address,
+      abi: EscrowContract.address,
+      functionName: 'releaseFunds',
+      onSuccess: () => {
+        setShowModal(false);
+        setAlertState({
+          show: true,
+          variant: 'success',
+          message: 'Funds release initiated! Waiting for confirmation.'
+        });
+      },
+      onError: (error) => {
+        setAlertState({
+          show: true,
+          variant: 'danger',
+          message: parseErrorMessage(error)
+        });
+      }
+    });
+
+    const EscrowStatus = {
+      Unfunded: 0,
+      InProgress: 1,
+      ExtensionRequested: 2,
+      ReadyForRelease: 3,
+      Completed: 4,
+      Disputed: 5
+    };
+
+    const { data: statusData, refetch: refetchStatus } = useReadContract({
+      address: EscrowContract.address,
+      abi: EscrowContract.abi,
+      functionName: 'currentStatus',
+      watch: true
+    });
+
+    const { 
+      write: markReady, 
+      data: markReadyTxData, 
+      error: markReadyError,
+      isLoading: isMarkReadyLoading 
+    } = useWriteContract({
+      address: EscrowContract.address,
+      abi: EscrowContract.abi,
+      functionName: 'markReady',
+      onSuccess: () => {
+        setAlertState({
+          show: true,
+          variant: 'success',
+          message: 'Work marked as ready. Waiting for transaction confirmation.'
+        });
+      },
+      onError: (error) => {
+        setAlertState({
+          show: true,
+          variant: 'danger',
+          message: parseErrorMessage(error)
+        });
+      }
+    });
+
+    useWaitForTransactionReceipt({
+      hash: markReadyTxData?.hash,
+      onSuccess: () => {
+        refetchStatus();
+        setAlertState({
+          show: true,
+          variant: 'success',
+          message: 'Work successfully marked as ready!'
+        });
+      }
+    });
+
+    const { 
+      isLoading: isConfirming, 
+      isSuccess: isConfirmed, 
+      error: confirmError 
+    } = useWaitForTransactionReceipt({
+      hash: txData?.hash,
+      onSuccess: () => {
+        setAlertState({
+          show: true,
+          variant: 'success',
+          message: 'Funds successfully released!'
+        });
+      },
+      onError: (error) => {
+        setAlertState({
+          show: true,
+          variant: 'danger',
+          message: `Confirmation failed: ${error.message}`
+        });
+      }
+    });
+
+    useEffect(() => {
+      if (statusData !== undefined) {
+        setCurrentStatus(Number(statusData));
+      }
+    }, [statusData]);
+
+    const parseErrorMessage = (error) => {
+      const errorString = error?.message?.toString() || '';
+      const errorMessages = {
+        'NotInProgress': 'Work is not in progress',
+        'NotReadyForRelease': 'Funds are not ready to be released',
+        'User rejected the request': 'Transaction was cancelled',
+        'insufficient funds': 'Not enough funds for transaction',
+      };
+  
+      for (const [key, message] of Object.entries(errorMessages)) {
+        if (errorString.includes(key)) return message;
+      }
+  
+      return 'Transaction failed';
+    };
+    const getButtonConfig = () => {
+      const [connectedAddress, setConnectedAddress] = useState(null);
+      const isCustomer = connectedAddress?.role === 'customer';
+      const currentEscrow = escrows.find(escrow => escrow.invoiceId === selectedInvoiceId);
+  
+      if (!currentEscrow) return {
+        text: 'No Escrow Selected',
+        action: () => {},
+        loading: false,
+        disabled: true,
+        visible: false
+      };
+      const isEscrowFunded = currentEscrow?.status?.toLowerCase() === 'funded';
+  const createdAtTimestamp = new Date(currentEscrow.createdAt).getTime();
+  const releaseTimeoutMs = currentEscrow.releaseTimeout * 1000;
+  const isReleaseTimeComplete = Date.now() >= (createdAtTimestamp + releaseTimeoutMs);
+  const canReleaseFunds = 
+  isCustomer && 
+  isEscrowFunded && 
+  isReleaseTimeComplete;
+
+if (canReleaseFunds) {
+  return {
+    text: 'Release Funds',
+    action: () => setShowModal(true),
+    loading: false,
+    visible: true
+  };
+}
+
+if (!isCustomer) {
+  return {
+    text: 'Not Authorized',
+    action: () => {},
+    loading: false,
+    disabled: true,
+    visible: false
+  };
+}
+
+if (!isEscrowFunded) {
+  return {
+    text: 'Escrow Not Funded',
+    action: () => {},
+    loading: false,
+    disabled: true,
+    visible: false
+  };
+}
+
+if (!isReleaseTimeComplete) {
+  // Calculate remaining time
+  const remainingTimeMs = (createdAtTimestamp + releaseTimeoutMs) - Date.now();
+  const remainingDays = Math.ceil(remainingTimeMs / (24 * 60 * 60 * 1000));
+
+  return {
+    text: `Release in ${remainingDays} days`,
+    action: () => {},
+    loading: false,
+    disabled: true,
+    visible: true
+  };
+}
+
+return {
+  text: 'Cannot Release Funds',
+  action: () => {},
+  loading: false,
+  disabled: true,
+  visible: false
+};
+    }
+        
+      
+    
+      // Default fallback configuration
+      
+    const buttonConfig = getButtonConfig();
+  
   const { data: totalEscrowsData, refetch: refetchTotal } = useReadContract({
     address: FlexiscrowContract.address,
     abi: FlexiscrowContract.abi,
@@ -293,7 +512,7 @@ const AdminDashboard = () => {
         toast.warning("Escrow created but status update failed");
       }
 
-      toast.success(`Escrow ${selectedEscrow.invoiceId} created successfully!`);
+      toast.success(`Escrow ${selectedEscrow.invoiceId} Transaction initiated! Waiting for confirmation`);
       setShowApprovalModal(false);
     } catch (error) {
       toast.error(`Failed to create escrow: ${error.message}`);
@@ -513,9 +732,10 @@ const AdminDashboard = () => {
                           {escrow?.status}
                         </span>
                       </td>
+                      
                       <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                            // onClick={() => handleFundEscrow(escrow)}
+                      {/* <button
+                            
                             disabled={!isConnected || escrow.status !== 'Accepted'}
                             className={`px-4 py-2 text-sm font-medium rounded-md ${
                               isConnected && escrow?.status === 'funded'
@@ -524,7 +744,31 @@ const AdminDashboard = () => {
                             }`}
                           >
                             Mark as complete
-                          </button>
+                          </button> */}
+                          {(buttonConfig.visible || buttonConfig.text === 'Release in X days') && (
+  <Button 
+    variant={buttonConfig.text.includes('days') ? 'warning' : 'primary'}
+    className={`px-4 py-2 text-sm font-medium rounded-md ${
+      buttonConfig.text.includes('days') 
+        ? 'bg-yellow-500 text-white' 
+        : 'bg-green-500 text-white'
+    }`}
+    onClick={buttonConfig.action}
+    disabled={buttonConfig.disabled || buttonConfig.loading}
+  >
+    {buttonConfig.loading ? (
+      <Spinner 
+        as="span"
+        animation="border"
+        size="sm"
+        role="status"
+        aria-hidden="true"
+        className="me-2"
+      />
+    ) : null}
+    {buttonConfig.text}
+  </Button>
+)}
                         {connectedAddress?.role === 'customer' ? (
                           
                           <button
