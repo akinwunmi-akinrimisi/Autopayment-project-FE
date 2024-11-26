@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import Input from "../../components/ui/input/input";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function DisputeForm() {
+    const location = useLocation(); // Get the location object
+    const { invoiceId } = location.state || {}; // Access the invoice ID from state
+  console.log(invoiceId)
   const [formData, setFormData] = useState({
-    invoiceId: "",
+    invoiceId: invoiceId || "",
     title: "",
     description: "",
     attachmentUrls: [],
@@ -20,8 +25,12 @@ function DisputeForm() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const handleFileChange = (file) => {
+    if (file) {
+      setFile(file); // Set the file state to the selected file
+    } else {
+      setFile(null); // Reset file state if no file is selected
+    }
   };
 
   const validateForm = () => {
@@ -37,11 +46,11 @@ function DisputeForm() {
       newErrors.description = "Description is required.";
     }
     if (!file) {
-      newErrors.file = "A document or image must be uploaded.";
+      newErrors.file = "A document or image must be uploaded."; // Ensure this error is set if no file is selected
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0; // Return true if no errors
   };
 
   const uploadFile = async () => {
@@ -93,8 +102,7 @@ function DisputeForm() {
         attachmentUrls: [fileUrl],
         resolutionDetails: "Awaiting response from billing department.",
       });
-
-      setResponseMessage("Dispute submitted successfully!");
+      toast.success("Dispute submitted successfully!");
       setFormData({
         invoiceId: "",
         title: "",
@@ -106,6 +114,7 @@ function DisputeForm() {
       setResponseMessage(
         `Error: ${error.response?.data?.message || error.message}`
       );
+      toast.error(`Error: ${error.response?.data?.message || error.message}`)
     } finally {
       setIsSubmitting(false);
     }
@@ -125,6 +134,7 @@ function DisputeForm() {
           value={formData.invoiceId}
           onChange={handleChange}
           error={errors.invoiceId}
+        //   readOnly={!!invoiceId}
         />
         <Input
           id="title"
@@ -164,7 +174,7 @@ function DisputeForm() {
           {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>
-      {responseMessage && (
+      {/* {responseMessage && (
         <p
           className={`mt-4 text-center ${
             responseMessage.startsWith("Error")
@@ -174,7 +184,7 @@ function DisputeForm() {
         >
           {responseMessage}
         </p>
-      )}
+      )} */}
     </div>
   );
 }

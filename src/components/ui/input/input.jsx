@@ -54,15 +54,13 @@ function Input({
   }, [type, value, pattern, selectedFiles, accept]);
 
   useEffect(() => {
-    if (localError || propError) {
-      validateInput();
-    }
+    validateInput(); // Validate input whenever dependencies change
   }, [localError, propError, validateInput]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setSelectedFiles(files); // Update selected files
-    onChange && onChange(files); // Pass files to the parent handler
+    onChange && onChange(files.length > 0 ? files[0] : null); // Pass the first file to the parent handler
   };
 
   return (

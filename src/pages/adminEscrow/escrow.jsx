@@ -14,6 +14,7 @@ import {
 } from 'react-bootstrap';
 import ApprovalModal from "../../components/modals/ApprovalModal";
 import FundModal from "../../components/modals/FundModal";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -40,6 +41,7 @@ const AdminDashboard = () => {
     completionDuration: "",
     releaseTimeout: "",
   });
+  const navigate = useNavigate()
 
   const _sellerAddress = localStorage.getItem("flexi_user");
   const sellerAddress = JSON.parse(_sellerAddress);
@@ -734,41 +736,15 @@ return {
                       </td>
                       
                       <td className="px-6 py-4 whitespace-nowrap">
-                      {/* <button
-                            
-                            disabled={!isConnected || escrow.status !== 'Accepted'}
-                            className={`px-4 py-2 text-sm font-medium rounded-md ${
-                              isConnected && escrow?.status === 'funded'
-                                ? 'bg-green-500 text-white hover:bg-green-600'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            Mark as complete
-                          </button> */}
-                          {(buttonConfig.visible || buttonConfig.text === 'Release in X days') && (
-  <Button 
-    variant={buttonConfig.text.includes('days') ? 'warning' : 'primary'}
-    className={`px-4 py-2 text-sm font-medium rounded-md ${
-      buttonConfig.text.includes('days') 
-        ? 'bg-yellow-500 text-white' 
-        : 'bg-green-500 text-white'
-    }`}
-    onClick={buttonConfig.action}
-    disabled={buttonConfig.disabled || buttonConfig.loading}
-  >
-    {buttonConfig.loading ? (
-      <Spinner 
-        as="span"
-        animation="border"
-        size="sm"
-        role="status"
-        aria-hidden="true"
-        className="me-2"
-      />
-    ) : null}
-    {buttonConfig.text}
-  </Button>
-)}
+                        <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
+                        <button
+                        onClick={() => 
+                          navigate("/admin/dispute", { state: { invoiceId: escrow.invoiceId } }) // Pass invoice ID as state
+                        }
+                        className="ml-2 px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                      >
+                        Submit Dispute
+                      </button>
                         {connectedAddress?.role === 'customer' ? (
                           
                           <button

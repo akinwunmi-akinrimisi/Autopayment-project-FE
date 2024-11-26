@@ -20,6 +20,8 @@ import LoginForm from "../pages/auth/login";
 import Escrow from "../pages/adminEscrow/escrow";
 import ProtectedRoute from "./ProtectedRoute";
 import Profile from "../pages/profile/Profile";
+import About from "../pages/about/about";
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,6 +31,7 @@ const router = createBrowserRouter(
       <Route path="/home/:id" element={<HomePage />} />
       <Route path="/authentication" element={<Auth />}></Route>
       <Route path="/login" element={<LoginForm />}></Route>
+      <Route path="/about" element={<About/>} />
 
       {/* EVERY OTHER PAGE ROUTING SHOULD BE DONE IN HERE */}
 
