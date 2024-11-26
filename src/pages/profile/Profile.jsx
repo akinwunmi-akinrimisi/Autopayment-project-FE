@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios"; 
 
@@ -52,8 +52,13 @@ const Profile = () => {
       });
 
       if (response.data) {
+        // Update local storage with the new user data
+        console.log("hello",response.data);
+        
+        localStorage.setItem("flexi_user", JSON.stringify(response.data));
+
         // Handle success - maybe show a toast notification
-        toast.success('Profile updated successfully')
+        toast.success('Profile updated successfully');
         console.log('Profile updated successfully');
       }
     } catch (err) {
@@ -70,6 +75,44 @@ const Profile = () => {
       // Add image upload logic here if needed
     },
   });
+
+  // Fetch user profile data
+  const fetchUserProfile = async () => {
+    const tokenString = localStorage.getItem("flexi_session");
+    const token = JSON.parse(tokenString);
+
+    if (!token) {
+      setError("Authentication token not found. Please login again.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token.token}`
+        }
+      });
+
+      if (response.data) {
+        setFormData((prev) => ({
+          ...prev,
+          phone: response.data.phone || "",
+          firstName: response.data.firstName || "",
+          lastName: response.data.lastName || "",
+          organizationName: response.data.organizationName || "",
+          website: response.data.website || "",
+          role: response.data.role || "",
+        }));
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'An error occurred while fetching profile');
+    }
+  };
+
+  // Call fetchUserProfile on component mount
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -89,12 +132,12 @@ const Profile = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="flex items-center justify-center gap-[40px]">
-          <div className="w-[400px] h-[400px] bg-[#FFFFFF] rounded-[10px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] flex flex-col items-center justify-center">
+          <div className="w-[400px] h-[400px] p-8 bg-[#FFFFFF] rounded-[10px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] flex flex-col items-center justify-center">
             <div
               {...getRootProps()}
               style={{
-                width: "200px",
-                height: "200px",
+                width: "150px",
+                height: "150px",
                 borderRadius: "50%",
                 border: "2px dashed #ddd",
                 display: "flex",
@@ -117,18 +160,18 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="mt-9">
-              <p className="text-[14px] text-[#888] text-center">
+            <div className="mt-3">
+              <p className="text-[14px] m-0 text-[#888] text-center">
                 Allowed format
               </p>
-              <p className="text-[14px] text-[#888] text-center">
+              <p className="text-[14px] m-0 text-[#888] text-center">
                 JPEG, PNG, and JPG
               </p>
             </div>
 
-            <div className="mt-9">
-              <p className="text-[14px] text-[#888] text-center">Max file size</p>
-              <p className="text-[14px] text-[#888] text-center">2MB</p>
+            <div className="mt-3">
+              <p className="text-[14px] m-0 text-[#888] text-center">Max file size</p>
+              <p className="text-[14px] m-0 text-[#888] text-center">2MB</p>
             </div>
           </div>
 
