@@ -1,30 +1,31 @@
-import pc_screen from "../../assets/home/pc_screen.svg";
-import phone_screen from "../../assets/home/phone_screen.svg";
-import phone_duplicate from "../../assets/home/phone_duplicate.svg";
+import pc_screen from "../../assets/home/about-1.svg";
+import phone_screen from "../../assets/home/about-2.svg";
+import phone_duplicate from "../../assets/home/about-3.svg";
 
 const AboutUs = () => {
     const steps = [
         {
-            title: "Initiate Escrow Transaction",
-            description: "Buyer selects a service or product and deposits the agreed amount into a secure Web3 escrow. Funds are safely held until the transaction is completed.",
+            title: "Empowering Trust and Growth",
+            description: "We are a Web3-enabled platform dedicated to simplifying payment processes, ensuring your funds are protected, and transactions are transparent.",
             image: pc_screen,
             imageAlt: "PC SCREEN",
             imageRight: true
         },
         {
-            title: "Deliver and Confirm",
-            description: "The platform provides real-time updates, allowing the buyer to track the status and progress of the delivery. Once the buyer receives the product or service, they have the opportunity to review it for quality and accuracy.",
+            title: "FLexiscrow: Secure Payment Solutions For Small Businesses",
+            description: "At Lexiscrow, we understand the challenges small businesses face with payment security and customer trust. Our platform leverages blockchain-powered escrow to hold payments securely until your product or service is delivered. Vendors can create detailed, professional invoices, while customers pay confidently, knowing funds are safely held and only released upon confirmation.",
             image: phone_screen,
             imageAlt: "PHONE SCREEN",
             imageRight: false
         },
         {
-            title: "Automatic Release",
-            description: "Upon buyer confirmation, funds are released to the seller instantly. Every transaction is transparently recorded on the blockchain for complete trust and security.",
+            title: "Secure, Transparent, and Effortless Transactions",
+            description: "Our mission is simple: to create a seamless, reliable invoicing experience that builds trust and supports growth for businesses and freelancers alike. With Lexiscrow, you gain access to advanced features like automated notifications, transparent transaction histories, and efficient dispute resolution, making every transaction smooth and stress-free.",
             image: phone_duplicate,
             imageAlt: "PHONE DUPLICATE",
             imageRight: true
-        }
+        },
+
     ];
 
 
@@ -34,19 +35,12 @@ const AboutUs = () => {
 
         >
             <h2
-                className="text-2xl md:text-3xl lg:text-[40px] font-semibold text-primary-base leading-tight md:leading-[60px] text-center"
+                className="text-2xl text-left md:text-3xl lg:text-[40px] font-semibold text-[#FF8D50] leading-tight md:leading-[60px] "
             >
-                How it works
+                About Us
             </h2>
 
-            <p
-                className="w-full lg:w-[1036px] text-center text-base md:text-lg lg:text-[22px] font-normal leading-relaxed lg:leading-[33px] text-[#073B77] mt-3"
-
-            >
-                Explore our comprehensive set of features, designed to make escrows
-                transactions easy, secure and efficient.
-            </p>
-            <div className="flex flex-col gap-16 md:gap-24 lg:gap-[144px] mt-16 md:mt-20 lg:mt-[144px]">
+            <div className="flex flex-col gap-16 md:gap-24 lg:gap-[144px] mt-16">
                 {steps.map((step, index) => (
                     <div
                         key={index}
@@ -58,13 +52,13 @@ const AboutUs = () => {
                             className="flex-1 flex flex-col justify-center gap-4 md:gap-[35px]"
                         >
                             <h3
-                                className="text-xl md:text-2xl lg:text-[24px] font-semibold leading-tight md:leading-[36px] text-center md:text-left "
+                                className="text-xl md:text-2xl lg:text-[24px] font-semibold leading-tight md:leading-[36px] text-left text-primary-base "
 
                             >
                                 {step.title}
                             </h3>
                             <p
-                                className="text-base md:text-lg lg:text-[22px] font-normal leading-relaxed lg:leading-[33px] text-text text-center md:text-left"
+                                className="text-base md:text-lg lg:text-[22px] font-normal leading-relaxed lg:leading-[33px] text-text text-left"
 
                             >
                                 {step.description}
@@ -78,7 +72,7 @@ const AboutUs = () => {
                             <img
                                 src={step.image}
                                 alt={step.imageAlt}
-                                className="w-full md:max-w-[400px] xl:max-w-[700px] h-auto object-contain"
+                                className="w-full md:max-w-[300px] xl:max-w-[700px] h-auto object-contain"
                             />
                         </div>
                     </div>

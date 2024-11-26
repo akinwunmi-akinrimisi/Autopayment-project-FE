@@ -48,7 +48,7 @@ const Header = ({invoiceId}) => {
               toast.info('Please complete your profile');
               navigate('/admin/profile');
             } else {
-              navigate('/admin/dashboard');
+              navigate('/admin/escrow');
             }
           } else {
             toast.error('Failed to authenticate wallet');
@@ -71,11 +71,11 @@ const Header = ({invoiceId}) => {
     const isLoggedIn = localStorage.getItem('flexi_session');
     
     if (!isLoggedIn && !isConnected) {
-      toast.warning('Please login to access the dashboard');
+      toast.warning('please connect your wallet to access the dashboard');
       return;
     }
     
-    navigate('/admin/dashboard');
+    navigate('/admin/escrow');
   };
 
   const handleConnect = async () => {
