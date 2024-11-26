@@ -17,7 +17,7 @@ const AdminSideBar = () => {
     },
     {
       title: "Dashboard",
-      path: "/admin/dashboard",
+      path: "/admin/escrow",
       icon: dashboardIcon,
     },
     ...(flexiUser?.role !== 'customer' ? [{
@@ -30,11 +30,11 @@ const AdminSideBar = () => {
     //   path: "/admin/new-escrow",
     //   icon: invoiceIcon,
     // },
-    {
-      title: "Chat",
-      path: "/admin/chat",
-      icon: chatIcon,
-    },
+    // {
+    //   title: "Chat",
+    //   path: "/admin/chat",
+    //   icon: chatIcon,
+    // },
     {
       title: "Escrow Details",
       path: "/admin/escrow",

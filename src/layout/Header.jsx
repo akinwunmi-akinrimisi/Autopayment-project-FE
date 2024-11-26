@@ -70,7 +70,7 @@ const Header = ({invoiceId}) => {
     e.preventDefault();
     const isLoggedIn = localStorage.getItem('flexi_session');
     
-    if (!isLoggedIn) {
+    if (!isLoggedIn && !isConnected) {
       toast.warning('Please login to access the dashboard');
       return;
     }
@@ -104,7 +104,7 @@ const Header = ({invoiceId}) => {
           </li>
 
           <li className="text-[#FFE2E0] text-[24px] font-medium no-underline">
-            <NavLink className="link">About Us</NavLink>
+            <NavLink className="link"  to="/about">About Us</NavLink>
           </li>
 
           <li className="text-[#FFFFFF] text-[24px] font-medium">
