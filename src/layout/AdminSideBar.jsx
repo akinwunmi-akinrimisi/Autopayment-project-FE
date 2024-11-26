@@ -35,11 +35,11 @@ const AdminSideBar = () => {
     //   path: "/admin/chat",
     //   icon: chatIcon,
     // },
-    {
-      title: "Escrow Details",
-      path: "/admin/escrow",
-      icon: invoiceIcon,
-    },
+    // {
+    //   title: "Escrow Details",
+    //   path: "/admin/escrow",
+    //   icon: invoiceIcon,
+    // },
     {
       title: "Dispute",
       path: "/admin/dispute",
