@@ -20,7 +20,8 @@ import LoginForm from "../pages/auth/login";
 import Escrow from "../pages/adminEscrow/escrow";
 import ProtectedRoute from "./ProtectedRoute";
 import Profile from "../pages/profile/Profile";
-import About from "../pages/about/about";
+import About from "../pages/about/About";
+// import About from "../pages/about/about";
 
 
 const router = createBrowserRouter(

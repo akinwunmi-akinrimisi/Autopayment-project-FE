@@ -52,9 +52,7 @@ const Profile = () => {
       });
 
       if (response.data) {
-        // Update local storage with the new user data
-        console.log("hello",response.data);
-        
+        // Update local storage with the new user data        
         localStorage.setItem("flexi_user", JSON.stringify(response.data));
 
         // Handle success - maybe show a toast notification
