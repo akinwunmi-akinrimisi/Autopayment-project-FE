@@ -3,11 +3,11 @@ import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from 'wagmi';
-import { toast } from "react-toastify";
 import { useEffect, useState } from 'react';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import axios from 'axios';
 import { disconnect } from "wagmi/actions";
+import { toast } from "react-toastify";
 
 const Header = ({invoiceId}) => {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const Header = ({invoiceId}) => {
               toast.info('Please complete your profile');
               navigate('/admin/profile');
             } else {
-              navigate('/admin/dashboard');
+              navigate('/admin/escrow');
             }
           } else {
             toast.error('Failed to authenticate wallet');
@@ -69,6 +69,11 @@ const Header = ({invoiceId}) => {
   const handleDashboardClick = (e) => {
     e.preventDefault();
     const isLoggedIn = localStorage.getItem('flexi_session');
+    
+    // Debugging logs
+    console.log('Dashboard Clicked');
+    console.log('Is Logged In:', isLoggedIn);
+    console.log('Is Connected:', isConnected);
     
     if (!isLoggedIn && !isConnected) {
       toast.warning('Please login to access the dashboard');
