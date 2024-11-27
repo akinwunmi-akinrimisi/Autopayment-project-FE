@@ -75,7 +75,7 @@ const Header = ({invoiceId}) => {
       return;
     }
     
-    navigate('/admin/dashboard');
+    navigate('/admin/escrow');
   };
 
   const handleConnect = async () => {
@@ -100,7 +100,7 @@ const Header = ({invoiceId}) => {
       <div>
         <ul className="flex items-center gap-10">
           <li className="text-[#FFE2E0] text-[24px] font-medium no-underline">
-            <NavLink className="link">Home</NavLink>
+            <NavLink className="link" to="/">Home</NavLink>
           </li>
 
           <li className="text-[#FFE2E0] text-[24px] font-medium no-underline">
