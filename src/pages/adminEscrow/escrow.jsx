@@ -327,6 +327,11 @@ return {
   const [showFundModal, setShowFundModal] = useState(false);
   const [selectedFundEscrow, setSelectedFundEscrow] = useState(null);
 
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [currentEscrowDetails, setCurrentEscrowDetails] = useState(null);
+
+  console.log("currentEscrowDetails", currentEscrowDetails);
+
   useEffect(() => {
     if (escrowData && selectedInvoiceId) {
       const [escrowAddress, buyer, seller, createdAt] = escrowData;
@@ -359,7 +364,11 @@ return {
           new Date(escrow.dueDate)
         ),
         releaseTimeout: 2 * 24 * 60 * 60,
-        createdAt: new Date(escrow.createdAt).toLocaleDateString(),
+        createdAt: new Date(escrow.createdAt).toLocaleDateString('en-US', {
+          year: '2-digit',
+          month: 'short',
+          day: 'numeric',
+        }),
         status: escrow?.status?.charAt(0).toUpperCase() + escrow?.status?.slice(1),
         isApproved: escrow?.status !== "pending",
         price: escrow?.price,
@@ -393,6 +402,10 @@ return {
     setSelectedInvoiceId(invoiceId);
     try {
       await refetch();
+      const currentEscrow = escrows.find(escrow => escrow.invoiceId === invoiceId);
+
+      setCurrentEscrowDetails(currentEscrow);
+      setShowDetailsModal(true);
     } catch (error) {
       toast.error("Failed to fetch escrow details");
     }
@@ -736,10 +749,20 @@ return {
                       </td>
                       
                       <td className="px-6 py-4 whitespace-nowrap">
-                      
-                        
+                        {connectedAddress?.role === 'customer' && canReleaseFunds ? (
+                          <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
+                        ) : null}
                         {connectedAddress?.role === 'customer' ? (
-                          
+                          <button
+                            onClick={() => 
+                              navigate("/admin/dispute", { state: { invoiceId: escrow.invoiceId } }) // Pass invoice ID as state
+                            }
+                            className="ml-2 px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                          >
+                            Submit Dispute
+                          </button>
+                        ) : null}
+                        {connectedAddress?.role === 'customer' ? (
                           <button
                             onClick={() => handleFundEscrow(escrow)}
                             disabled={!isConnected || escrow.status !== 'Accepted'}
@@ -751,7 +774,6 @@ return {
                           >
                             Fund
                           </button>
-                          
                         ) : (
                           !escrow?.isApproved && escrow?.status !== "Failed" && connectedAddress?.role === 'customer'? (
                             <button
@@ -769,77 +791,19 @@ return {
                             escrow?.status === "Accepted" &&
                             isConnected && (
                               <button
-                                onClick={() =>
-                                  handleViewDetails(escrow?.invoiceId)
-                                }
+                                onClick={() => handleViewDetails(escrow?.invoiceId)}
                                 disabled={isReadLoading}
                                 className="px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
                               >
-                                {isReadLoading &&
-                                selectedInvoiceId === escrow?.invoiceId
+                                {isReadLoading && selectedInvoiceId === escrow?.invoiceId
                                   ? "Loading..."
                                   : "View Details"}
                               </button>
-                              
                             )
                           )
                         )}
                       </td>
                     </tr>
-                    {escrowDetails[escrow?.invoiceId] && (
-                      <tr className="bg-gray-50">
-                        <td colSpan="7" className="px-6 py-4">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">
-                                Escrow Address
-                              </p>
-                              <p className="text-sm font-mono text-gray-900">
-                                {`${escrowDetails[
-                                  selectedEscrow?.invoiceId
-                                ]?.escrowAddress?.slice(0, 6)}...${escrowDetails[
-                                  escrow?.invoiceId
-                                ]?.escrowAddress?.slice(-4)}`}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">
-                                Buyer
-                              </p>
-                              <p className="text-sm font-mono text-gray-900">
-                                {`${escrowDetails[
-                                  selectedEscrow?.invoiceId
-                                ]?.buyer?.slice(0, 6)}...${escrowDetails[
-                                  escrow?.invoiceId
-                                ]?.buyer?.slice(-4)}`}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">
-                                Seller
-                              </p>
-                              <p className="text-sm font-mono text-gray-900">
-                                {`${escrowDetails[
-                                  selectedEscrow?.invoiceId
-                                ]?.seller?.slice(0, 6)}...${escrowDetails[
-                                  escrow?.invoiceId
-                                ]?.seller?.slice(-4)}`}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-500">
-                                Created At
-                              </p>
-                              <p className="text-sm text-gray-900">
-                                {
-                                  escrowDetails[selectedEscrow?.invoiceId]?.createdAt
-                                }
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </React.Fragment>
                 ))}
               </tbody>
@@ -865,6 +829,30 @@ return {
         selectedEscrow={selectedFundEscrow}
         onFund={handleFundConfirm}
       />
+
+      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Escrow Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {currentEscrowDetails && (
+            <div className="">
+              <h5>Invoice ID: {currentEscrowDetails.invoiceId}</h5>
+              <p>Seller: {currentEscrowDetails.seller}</p>
+              <p>Buyer: {currentEscrowDetails.buyer}</p>
+              <p>Completion Duration: {formatDuration(currentEscrowDetails.completionDuration)}</p>
+              <p>Release Timeout: {formatDuration(currentEscrowDetails.releaseTimeout)}</p>
+              <p>Created At: {currentEscrowDetails.createdAt}</p>
+              <p>Status: {currentEscrowDetails.status}</p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
