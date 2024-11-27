@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Modal, Button } from "react-bootstrap";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast, ToastContainer } from "react-toastify";
 import { ethers, parseEther } from "ethers";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,18 +11,30 @@ const FundModal = ({ showModal, onHide, selectedEscrow, onFund }) => {
 		useWriteContract();
 	const { address } = useAccount();
 
-	const { writeContract: approveUSDCRaw } = useWriteContract({
+	const { writeContract: approveUSDCRaw, data: hash, } = useWriteContract({
 		address: LiskTokenContract.address,
 		abi: LiskTokenContract.abi,
 		functionName: "approve",
 	});
 
-	const { data: allowanceData } = useReadContract({
+	
+
+	const {data: isLoaded, error: isError} = useWaitForTransactionReceipt();
+
+	const {data: isConfirmed} = useWaitForTransactionReceipt({hash});
+
+	const { data: allowanceData, refetch } = useReadContract({
 		address: LiskTokenContract.address,
 		abi: LiskTokenContract.abi,
 		functionName: "allowance",
 		args: [address, EscrowContract.address],
 	});
+
+	useEffect(() =>{
+      if (isConfirmed) refetch()
+	},[isConfirmed])
+
+	
 
 	const handleApprove = async () => {
 		const priceInEther = parseFloat(selectedEscrow.price);

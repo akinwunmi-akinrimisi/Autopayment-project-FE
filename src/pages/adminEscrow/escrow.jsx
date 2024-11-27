@@ -736,15 +736,8 @@ return {
                       </td>
                       
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
-                        <button
-                        onClick={() => 
-                          navigate("/admin/dispute", { state: { invoiceId: escrow.invoiceId } }) // Pass invoice ID as state
-                        }
-                        className="ml-2 px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        Submit Dispute
-                      </button>
+                      
+                        
                         {connectedAddress?.role === 'customer' ? (
                           
                           <button
@@ -760,7 +753,7 @@ return {
                           </button>
                           
                         ) : (
-                          !escrow?.isApproved && escrow?.status !== "Failed" ? (
+                          !escrow?.isApproved && escrow?.status !== "Failed" && connectedAddress?.role === 'customer'? (
                             <button
                               onClick={() => handleApprovalClick(escrow)}
                               disabled={!isConnected}
