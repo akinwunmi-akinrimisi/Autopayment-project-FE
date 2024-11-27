@@ -59,9 +59,7 @@ const InvoiceForm = () => {
       setLoading(false);
       return;
     }
-
-    console.log("token", token);
-
+    
     const apiData = {
       ...formData,
       price: total,
@@ -80,7 +78,15 @@ const InvoiceForm = () => {
         }
       );
 
-      console.log("Invoice created:", response.data);
+      toast.success("Invoice created successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
       // Reset form after successful submission
       setFormData({
         productName: "",
@@ -90,16 +96,6 @@ const InvoiceForm = () => {
         customerLastName: "",
         customerEmail: "",
         dueDate: new Date(),
-      });
-
-      // Replace alert with toast
-      toast.success("Invoice created successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
       });
 
       navigate('/admin/escrow');
@@ -137,7 +133,7 @@ const InvoiceForm = () => {
             {/* Product Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Completion duration
+                Product Name
               </label>
               <input
                 type="text"
