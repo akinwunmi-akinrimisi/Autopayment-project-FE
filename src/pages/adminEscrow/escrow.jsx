@@ -15,8 +15,8 @@ import {
 import ApprovalModal from "../../components/modals/ApprovalModal";
 import FundModal from "../../components/modals/FundModal";
 import { useNavigate } from "react-router-dom";
-
-
+import DetailsModal from "../../components/modals/DetailsModal";
+import EscrowDropDown from "./EscrowDropDown";
 
 const AdminDashboard = () => {
   const ADMIN_ADDRESS = "0x9Ee124A9A260aa68843F9d11B9529589c5cb83fC";
@@ -679,9 +679,11 @@ return {
             Recent Escrows
           </h2>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[300px]">
           {isLoadingEscrows ? (
             <div className="p-6 text-center">Loading escrows...</div>
+          ) : escrows.length === 0 ? (
+            <div className="p-6 text-center text-gray-500 text-2xl">No invoices available yet</div>
           ) : (
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -696,7 +698,7 @@ return {
                     Release Timeout
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Completion duration
+                    Completion duration
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created At
@@ -749,59 +751,19 @@ return {
                       </td>
                       
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {connectedAddress?.role === 'customer' && canReleaseFunds ? (
-                          <button className="px-4 py-2 text-sm font-medium rounded-md bg-green-500 text-white hover:bg-green-600">Release funds</button>
-                        ) : null}
-                        {connectedAddress?.role === 'customer' ? (
-                          <button
-                            onClick={() => 
-                              navigate("/admin/dispute", { state: { invoiceId: escrow.invoiceId } }) // Pass invoice ID as state
+                        <div className="relative inline-block text-left">
+                          <EscrowDropDown
+                            // Ensure the dropdown is positioned correctly
+                            onSubmitDispute={() => 
+                              navigate("/admin/dispute", { state: { invoiceId: escrow.invoiceId } })
                             }
-                            className="ml-2 px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
-                          >
-                            Submit Dispute
-                          </button>
-                        ) : null}
-                        {connectedAddress?.role === 'customer' ? (
-                          <button
-                            onClick={() => handleFundEscrow(escrow)}
-                            disabled={!isConnected || escrow.status !== 'Accepted'}
-                            className={`px-4 py-2 text-sm font-medium rounded-md ${
-                              isConnected && escrow?.status === 'Accepted'
-                                ? 'bg-green-500 text-white hover:bg-green-600'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            Fund
-                          </button>
-                        ) : (
-                          !escrow?.isApproved && escrow?.status !== "Failed" && connectedAddress?.role === 'customer'? (
-                            <button
-                              onClick={() => handleApprovalClick(escrow)}
-                              disabled={!isConnected}
-                              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                                isConnected
-                                  ? "bg-pink-500 text-white hover:bg-pink-600"
-                                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              }`}
-                            >
-                              Approve
-                            </button>
-                          ) : (
-                            escrow?.status === "Accepted" &&
-                            isConnected && (
-                              <button
-                                onClick={() => handleViewDetails(escrow?.invoiceId)}
-                                disabled={isReadLoading}
-                                className="px-4 py-2 text-sm font-medium rounded-md bg-blue-500 text-white hover:bg-blue-600"
-                              >
-                                {isReadLoading && selectedInvoiceId === escrow?.invoiceId
-                                  ? "Loading..."
-                                  : "View Details"}
-                              </button>
-                            )
-                          )
-                        )}
+                            userRole={connectedAddress?.role}
+                            escrowStatus={escrow?.status}
+                            onFund={() => handleFundEscrow(escrow)}
+                            onApprove={() => handleApprovalClick(escrow)}
+                            onView={() => handleViewDetails(escrow.invoiceId)}
+                          />
+                        </div>
                       </td>
                     </tr>
                   </React.Fragment>
@@ -830,29 +792,12 @@ return {
         onFund={handleFundConfirm}
       />
 
-      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Escrow Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {currentEscrowDetails && (
-            <div className="">
-              <h5>Invoice ID: {currentEscrowDetails.invoiceId}</h5>
-              <p>Seller: {currentEscrowDetails.seller}</p>
-              <p>Buyer: {currentEscrowDetails.buyer}</p>
-              <p>Completion Duration: {formatDuration(currentEscrowDetails.completionDuration)}</p>
-              <p>Release Timeout: {formatDuration(currentEscrowDetails.releaseTimeout)}</p>
-              <p>Created At: {currentEscrowDetails.createdAt}</p>
-              <p>Status: {currentEscrowDetails.status}</p>
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <DetailsModal
+        showModal={showDetailsModal}
+        onHide={() => setShowDetailsModal(false)}
+        currentEscrowDetails={currentEscrowDetails}
+        formatDuration={formatDuration}
+      />
     </div>
   );
 };
