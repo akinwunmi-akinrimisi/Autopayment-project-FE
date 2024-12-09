@@ -67,7 +67,7 @@ const AdminDashboard = () => {
       isLoading: isWriteLoading 
     } = useWriteContract({
       address: EscrowContract.address,
-      abi: EscrowContract.address,
+      abi: EscrowContract.abi,
       functionName: 'releaseFunds',
       onSuccess: () => {
         setShowModal(false);
